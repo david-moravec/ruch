@@ -47,12 +47,16 @@ impl Board {
     
     fn color_pieces_bit_board(&self, color: &Color, piece: &Piece) -> u64 {
         *self.bit_boards.get(color).unwrap()
-                       .get(piece).unwrap()
+                        .get(piece).unwrap()
     }
 
     fn color_pieces_bit_board_mut(&mut self, color: &Color, piece: &Piece) -> u64 {
         *self.bit_boards.get_mut(color).unwrap()
-                       .get_mut(piece).unwrap()
+                        .get_mut(piece).unwrap()
+    }
+    
+    fn set_color_pieces_bit_board(&mut self, color: &Color, piece: Piece, bitboard: u64) -> () {
+        self.bit_boards.get_mut(color).unwrap().insert(piece, bitboard);
     }
     
     fn fill_board(&mut self) -> () {
@@ -62,27 +66,30 @@ impl Board {
 
 fn fill_board_with_pawns(board: &mut Board) -> () {
     let mut black_pawn_bit_board = board.color_pieces_bit_board_mut(&Color::BLACK, &Piece::PAWN);
-    print!("Before fill \n {}\n", black_pawn_bit_board);
     
     for i in 8 .. 16 {
         black_pawn_bit_board = black_pawn_bit_board | (ONE << i);
     }
-
-    print!("After fill \n {:064b}\n", black_pawn_bit_board);
+    
+    board.set_color_pieces_bit_board(&Color::BLACK, Piece::PAWN, black_pawn_bit_board);
 }
 
 fn print_board(board: &Board) -> () {
     for piece in Piece::iter() {
         let piece_bit_board = board.pieces_bit_board(&piece);
-    
+        
         for i in 0 .. 64 {
-            if (ONE >> i & piece_bit_board) != 0 {
-                print!("{}", piece)
-            }
-            if i % 7 == 0 {
+            if i % 8 == 0 && i > 0 {
                 print!("\n")
             }
+            if (ONE << i & piece_bit_board) != 0 {
+                print!("{}", piece)
+            } else {
+                print!("-")
+            }
         }
+        print!("\n#####next bit board#####\n")
+        
     }
     return
 }
