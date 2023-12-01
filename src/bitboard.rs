@@ -66,10 +66,6 @@ impl Board {
         self.bit_boards.get_mut(&color).unwrap().insert(piece, bitboard);
     }
     
-    fn fill_board(&mut self) -> () {
-        fill_board_with_pawns(self);
-    }
-
     pub fn put_piece_on_square(
         &mut self, color: Color,piece: Piece, square: Square
     ) -> Result<(), &str> {
@@ -116,3 +112,24 @@ fn print_board(board: &Board) -> () {
     }
     return
 }
+
+#[cfg(test)]
+mod test {
+    use super::{Board, fill_board_with_pawns, BLACK, Piece, ONE};
+
+    #[test]
+    fn test_fill_board_with_pawns() {
+        let mut board = Board::new();
+        fill_board_with_pawns(&mut board);
+
+        let mut correct_result = 0;
+
+        for i in 8 .. 16 {
+            correct_result = correct_result | (ONE << i);
+        }
+
+        assert_eq!(board.color_pieces_bit_board(BLACK, Piece::PAWN), correct_result)
+    }
+
+}
+
