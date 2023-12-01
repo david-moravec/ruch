@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 use crate::piece::{Piece, Color};
+use crate::square::Square;
 
 static ONE: u64 = 1;
 static ZERO: u64 = 0;
@@ -67,9 +68,10 @@ impl Board {
 fn fill_board_with_pawns(board: &mut Board) -> () {
     let mut black_pawn_bit_board = board.color_pieces_bit_board_mut(&Color::BLACK, &Piece::PAWN);
     
-    for i in 8 .. 16 {
+    for i in Square::B1 as u64 ..= Square::B8 as u64 {
         black_pawn_bit_board = black_pawn_bit_board | (ONE << i);
     }
+    print_board(board);
     
     board.set_color_pieces_bit_board(&Color::BLACK, Piece::PAWN, black_pawn_bit_board);
 }
