@@ -1,9 +1,10 @@
 mod bitboard;
 mod piece;
+mod square;
 
 
 use crate::bitboard::Board;
 
 fn main() {
-    let bitboard = Board::new();
+    let bboard = Board::new();
 }
