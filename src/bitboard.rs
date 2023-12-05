@@ -13,7 +13,7 @@ pub struct Board {
 }
 
 fn square_occupied(bboard: u64, square: Square) -> bool {
-    bboard & (ONE << square as u64) == 0
+    bboard & (ONE << square as u64) != 0
 }
 
 impl Board {
