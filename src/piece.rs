@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str::FromStr;
 use strum_macros::EnumIter;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -32,5 +33,35 @@ impl fmt::Display for Piece {
                &Piece::KING => write!(f, "k"),
            } 
     }
-    
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParsePieceError;
+
+impl FromStr for Piece {
+    type Err = ParsePieceError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+           "p" => Ok(Piece::PAWN),
+           "n" => Ok(Piece::KNIGHT),
+           "b" => Ok(Piece::BISHOP),
+           "r" => Ok(Piece::ROOK),
+           "q" => Ok(Piece::QUEEN),
+           "k" => Ok(Piece::KING),
+           _ => Err(ParsePieceError),
+       } 
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Piece, FromStr};
+    
+    #[test]
+    fn test_from_str() {
+        assert_eq!(Piece::from_str("p"), Ok(Piece::PAWN));
+        assert!(Piece::from_str("x").is_err()); 
+    }
+}
+

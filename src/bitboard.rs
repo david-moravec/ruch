@@ -88,6 +88,10 @@ fn fill_board_with_pawns(board: &mut Board) -> () {
     board.set_color_pieces_bit_board(BLACK, Piece::PAWN, black_pawn_bit_board);
 }
 
+fn fill_board_according_to_FEN(board: &mut Board, fen_string: &str) -> () {
+    panic!();
+}
+
 fn print_board(board: &Board) -> () {
     for piece in Piece::iter() {
         let piece_bit_board = board.pieces_bit_board(piece);
