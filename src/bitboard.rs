@@ -27,16 +27,12 @@ impl Board {
             (Piece::KING, ZERO),
         ]);
         
-        let mut board = Board { 
+        Board { 
             bit_boards: HashMap::from([
                 (WHITE, one_side_map.clone()),
                 (BLACK, one_side_map), 
             ])
-        };
-        
-        fill_board_with_pawns(&mut board);
-        print_board(&board);
-        board
+        }
     }
 
     
@@ -76,8 +72,7 @@ impl Board {
         } else {
             bboard = bboard | (ONE << square as u64);
             self.set_color_pieces_bit_board(color, piece, bboard);
-
-            return Ok(())
+            Ok(())
         }
     }
 }
@@ -115,7 +110,7 @@ fn print_board(board: &Board) -> () {
 
 #[cfg(test)]
 mod test {
-    use super::{Board, fill_board_with_pawns, BLACK, Piece, ONE};
+    use super::{Board, fill_board_with_pawns, BLACK, Piece, ONE, Square};
 
     #[test]
     fn test_fill_board_with_pawns() {
@@ -131,5 +126,14 @@ mod test {
         assert_eq!(board.color_pieces_bit_board(BLACK, Piece::PAWN), correct_result)
     }
 
+    #[test]
+    fn test_put_piece_on_square() {
+        let mut board = Board::new();
+        assert_eq!(board.color_pieces_bit_board(BLACK, Piece::ROOK), 0);
+        assert!(board.put_piece_on_square(BLACK, Piece::ROOK, Square::C6).is_ok());
+        assert_eq!(board.color_pieces_bit_board(BLACK,Piece::ROOK), ONE << Square::C6 as u64);
+
+        assert!(board.put_piece_on_square(BLACK, Piece::ROOK, Square::C6).is_err());
+    }
 }
 
