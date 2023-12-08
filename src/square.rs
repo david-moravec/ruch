@@ -1,3 +1,5 @@
+use std::{num::TryFromIntError, fmt::Error};
+
 use int_enum::IntEnum;
 use strum_macros::EnumIter;
 
@@ -69,3 +71,78 @@ pub enum Square {
     H7 = 62,
     H8 = 63,
 }
+
+impl TryFrom<u64> for Square {
+    type Error = &'static str;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Square::A1),
+            1 => Ok(Square::A2),
+            2 => Ok(Square::A3),
+            3 => Ok(Square::A4),
+            4 => Ok(Square::A5),
+            5 => Ok(Square::A6),
+            6 => Ok(Square::A7),
+            7 => Ok(Square::A8),
+            8 => Ok(Square::B1),
+            9 => Ok(Square::B2),
+            10 => Ok(Square::B3),
+            11 => Ok(Square::B4),
+            12 => Ok(Square::B5),
+            13 => Ok(Square::B6),
+            14 => Ok(Square::B7),
+            15 => Ok(Square::B8),
+            16 => Ok(Square::C1),
+            17 => Ok(Square::C2),
+            18 => Ok(Square::C3),
+            19 => Ok(Square::C4),
+            20 => Ok(Square::C5),
+            21 => Ok(Square::C6),
+            22 => Ok(Square::C7),
+            23 => Ok(Square::C8),
+            24 => Ok(Square::D1),
+            25 => Ok(Square::D2),
+            26 => Ok(Square::D3),
+            27 => Ok(Square::D4),
+            28 => Ok(Square::D5),
+            29 => Ok(Square::D6),
+            30 => Ok(Square::D7),
+            31 => Ok(Square::D8),
+            32 => Ok(Square::E1),
+            33 => Ok(Square::E2),
+            34 => Ok(Square::E3),
+            35 => Ok(Square::E4),
+            36 => Ok(Square::E5),
+            37 => Ok(Square::E6),
+            38 => Ok(Square::E7),
+            39 => Ok(Square::E8),
+            40 => Ok(Square::F1),
+            41 => Ok(Square::F2),
+            42 => Ok(Square::F3),
+            43 => Ok(Square::F4),
+            44 => Ok(Square::F5),
+            45 => Ok(Square::F6),
+            46 => Ok(Square::F7),
+            47 => Ok(Square::F8),
+            48 => Ok(Square::G1),
+            49 => Ok(Square::G2),
+            50 => Ok(Square::G3),
+            51 => Ok(Square::G4),
+            52 => Ok(Square::G5),
+            53 => Ok(Square::G6),
+            54 => Ok(Square::G7),
+            55 => Ok(Square::G8),
+            56 => Ok(Square::H1),
+            57 => Ok(Square::H2),
+            58 => Ok(Square::H3),
+            59 => Ok(Square::H4),
+            60 => Ok(Square::H5),
+            61 => Ok(Square::H6),
+            62 => Ok(Square::H7),
+            63 => Ok(Square::H8),
+            _ => Err("Cannot convert given int to Square"),
+        }
+    }
+}
+
