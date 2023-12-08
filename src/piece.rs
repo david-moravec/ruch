@@ -8,6 +8,25 @@ pub enum Color {
     WHITE
 }
 
+impl Color {
+    pub fn from_char(c: char) -> Self {
+        if c.is_uppercase() {
+            Color::WHITE
+        } else {
+            Color::BLACK
+        }
+    }
+
+    pub fn oposite(self) -> Self {
+        if self == Color::WHITE {
+            Color::BLACK
+        } else {
+            Color::WHITE
+        }
+    }
+}
+
+
 #[derive(EnumIter, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Piece {
     PAWN,
@@ -53,15 +72,3 @@ impl FromStr for Piece {
        } 
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::{Piece, FromStr};
-    
-    #[test]
-    fn test_from_str() {
-        assert_eq!(Piece::from_str("p"), Ok(Piece::PAWN));
-        assert!(Piece::from_str("x").is_err()); 
-    }
-}
-

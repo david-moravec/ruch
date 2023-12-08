@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::str::FromStr;
+use int_enum::IntEnum;
 use strum::IntoEnumIterator;
 
 use crate::piece::{Piece, Color};
@@ -88,8 +90,14 @@ fn fill_board_with_pawns(board: &mut Board) -> () {
     board.set_color_pieces_bit_board(BLACK, Piece::PAWN, black_pawn_bit_board);
 }
 
-fn fill_board_according_to_FEN(board: &mut Board, fen_string: &str) -> () {
-    panic!();
+pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
+    for (i, c) in fen_string.replace("/", "").chars().enumerate() {
+        board.put_piece_on_square(
+            Color::from_char(c),
+            Piece::from_str(&c.to_string()).unwrap(),
+            Square::from_int(i as u64).unwrap()
+        ).unwrap();
+    }
 }
 
 fn print_board(board: &Board) -> () {
