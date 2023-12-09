@@ -36,20 +36,8 @@ impl Board {
             ])
         }
     }
+    
 
-    pub fn put_piece_on_square(
-        &mut self, color: Color,piece: Piece, square: Square
-    ) -> Result<(), &str> {
-        let mut bboard = self.color_pieces_bit_board_mut(color, piece);
-
-        if square_occupied(bboard, square) {
-            return Err("Square occupied")
-        } else {
-            bboard = bboard | (ONE << square as u64);
-            self.set_color_pieces_bit_board(color, piece, bboard);
-            Ok(())
-        }
-    }
 
     fn pieces_bit_board(&self, piece: Piece) -> u64 {
         self.color_pieces_bit_board(BLACK, piece) 
@@ -75,6 +63,40 @@ impl Board {
     
     fn set_color_pieces_bit_board(&mut self, color: Color, piece: Piece, bitboard: u64) -> () {
         self.bit_boards.get_mut(&color).unwrap().insert(piece, bitboard);
+    }
+
+    pub fn color_all_pieces(self, color: Color) -> u64 {
+        let mut result: u64 = 0;
+
+        for piece in Piece::iter() {
+            result = result | self.color_pieces_bit_board(color, piece);
+        }
+
+        result
+    }
+
+    pub fn all_pieces(self) -> u64 {
+        let mut result: u64 = 0;
+
+        for piece in Piece::iter() {
+            result = result | self.pieces_bit_board(piece);
+        }
+
+        result
+    }
+
+    pub fn put_piece_on_square(
+        &mut self, color: Color,piece: Piece, square: Square
+    ) -> Result<(), &str> {
+        let mut bboard = self.color_pieces_bit_board_mut(color, piece);
+
+        if square_occupied(bboard, square) {
+            return Err("Square occupied")
+        } else {
+            bboard = bboard | (ONE << square as u64);
+            self.set_color_pieces_bit_board(color, piece, bboard);
+            Ok(())
+        }
     }
 }
 
