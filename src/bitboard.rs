@@ -37,7 +37,20 @@ impl Board {
         }
     }
 
-    
+    pub fn put_piece_on_square(
+        &mut self, color: Color,piece: Piece, square: Square
+    ) -> Result<(), &str> {
+        let mut bboard = self.color_pieces_bit_board_mut(color, piece);
+
+        if square_occupied(bboard, square) {
+            return Err("Square occupied")
+        } else {
+            bboard = bboard | (ONE << square as u64);
+            self.set_color_pieces_bit_board(color, piece, bboard);
+            Ok(())
+        }
+    }
+
     fn pieces_bit_board(&self, piece: Piece) -> u64 {
         self.color_pieces_bit_board(BLACK, piece) 
         | 
@@ -63,20 +76,6 @@ impl Board {
     fn set_color_pieces_bit_board(&mut self, color: Color, piece: Piece, bitboard: u64) -> () {
         self.bit_boards.get_mut(&color).unwrap().insert(piece, bitboard);
     }
-    
-    pub fn put_piece_on_square(
-        &mut self, color: Color,piece: Piece, square: Square
-    ) -> Result<(), &str> {
-        let mut bboard = self.color_pieces_bit_board_mut(color, piece);
-
-        if square_occupied(bboard, square) {
-            return Err("Square occupied")
-        } else {
-            bboard = bboard | (ONE << square as u64);
-            self.set_color_pieces_bit_board(color, piece, bboard);
-            Ok(())
-        }
-    }
 }
 
 fn fill_board_with_pawns(board: &mut Board) -> () {
@@ -91,16 +90,23 @@ fn fill_board_with_pawns(board: &mut Board) -> () {
 }
 
 pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
-    for (i, c) in fen_string.replace("/", "").chars().enumerate() {
-        board.put_piece_on_square(
-            Color::from_char(c),
-            Piece::from_str(&c.to_string()).unwrap(),
-            Square::from_int(i as u64).unwrap()
-        ).unwrap();
+    let mut i: u64 = 0;
+
+    for c in fen_string.replace("/", "").chars() {
+        if c.is_numeric() {
+            i += c.to_digit(10).unwrap_or(0) as u64;
+        } else {
+            board.put_piece_on_square(
+                Color::from_char(c),
+                Piece::from_str(&c.to_string().to_lowercase()).unwrap(),
+                Square::from_int(i).unwrap()
+            ).unwrap();
+            i += 1;
+        }
     }
 }
 
-fn print_board(board: &Board) -> () {
+pub fn print_board(board: &Board) -> () {
     for piece in Piece::iter() {
         let piece_bit_board = board.pieces_bit_board(piece);
         
