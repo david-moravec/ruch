@@ -1,12 +1,11 @@
-use std::fmt;
-use std::str::FromStr;
-use strum_macros::EnumIter;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Color {
     BLACK,
     WHITE
 }
+
+use Color::*;
 
 impl Color {
     pub fn from_char(c: char) -> Self {
@@ -26,49 +25,83 @@ impl Color {
     }
 }
 
-
-#[derive(EnumIter, Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Piece {
-    PAWN,
-    KNIGHT,
-    BISHOP,
-    ROOK,
-    QUEEN,
-    KING,
+    PAWN(Color),
+    KNIGHT(Color),
+    BISHOP(Color),
+    ROOK(Color),
+    QUEEN(Color),
+    KING(Color),
 }
+
+use Piece::*;
 
 impl Piece {
     pub fn move_bit_maps() -> u64 {0 as u64}
-}
 
-impl fmt::Display for Piece {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-           match self {
-               &Piece::PAWN => write!(f, "p"),
-               &Piece::KNIGHT => write!(f, "n"),
-               &Piece::BISHOP => write!(f, "b"),
-               &Piece::ROOK => write!(f, "r"),
-               &Piece::QUEEN => write!(f, "q"),
-               &Piece::KING => write!(f, "k"),
-           } 
+    pub fn color(&self) -> Color {
+        match &self {
+            PAWN(WHITE) | KNIGHT(WHITE) | BISHOP(WHITE) | ROOK(WHITE) | QUEEN(WHITE) | KING(WHITE) => WHITE,
+            PAWN(BLACK) | KNIGHT(BLACK) | BISHOP(BLACK) | ROOK(BLACK) | QUEEN(BLACK) | KING(BLACK) => BLACK,
+        }
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ParsePieceError;
 
-impl FromStr for Piece {
-    type Err = ParsePieceError;
+impl Piece {
+    fn to_char(&self) -> char {
+           match &self {
+               PAWN(WHITE) => 'P',
+               KNIGHT(WHITE) => 'N',
+               BISHOP(WHITE) => 'B',
+               ROOK(WHITE) => 'R',
+               QUEEN(WHITE) => 'Q',
+               KING(WHITE) => 'K',
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-           "p" => Ok(Piece::PAWN),
-           "n" => Ok(Piece::KNIGHT),
-           "b" => Ok(Piece::BISHOP),
-           "r" => Ok(Piece::ROOK),
-           "q" => Ok(Piece::QUEEN),
-           "k" => Ok(Piece::KING),
+               PAWN(BLACK) => 'p',
+               KNIGHT(BLACK) => 'n',
+               BISHOP(BLACK) => 'b',
+               ROOK(BLACK) => 'r',
+               QUEEN(BLACK) => 'q',
+               KING(BLACK) => 'k',
+           } 
+    }
+
+    pub fn from_char(c: char) -> Result<Self, ParsePieceError> {
+        match c {
+           'P' => Ok(PAWN(WHITE)),
+           'N' => Ok(KNIGHT(WHITE)),
+           'B' => Ok(BISHOP(WHITE)),
+           'R' => Ok(ROOK(WHITE)),
+           'Q' => Ok(QUEEN(WHITE)),
+           'K' => Ok(KING(WHITE)),
+
+           'p' => Ok(PAWN(BLACK)),
+           'n' => Ok(KNIGHT(BLACK)),
+           'b' => Ok(BISHOP(BLACK)),
+           'r' => Ok(ROOK(BLACK)),
+           'q' => Ok(QUEEN(BLACK)),
+           'k' => Ok(KING(BLACK)),
            _ => Err(ParsePieceError),
        } 
     }
 }
+
+pub static PIECE_SET: [Piece; 12] = [
+           PAWN(WHITE),
+           KNIGHT(WHITE),
+           BISHOP(WHITE),
+           ROOK(WHITE),
+           QUEEN(WHITE),
+           KING(WHITE),
+           PAWN(BLACK),
+           KNIGHT(BLACK),
+           BISHOP(BLACK),
+           ROOK(BLACK),
+           QUEEN(BLACK),
+           KING(BLACK),
+];
+

@@ -1,17 +1,16 @@
-use std::collections::HashMap;
-use std::str::FromStr;
+use std::collections::{HashMap, HashSet};
+use std::iter::{zip, repeat};
 use int_enum::IntEnum;
-use strum::IntoEnumIterator;
 
-use crate::piece::{Piece, Color};
-use crate::piece::Color::{BLACK, WHITE};
+use crate::piece::{Piece, PIECE_SET};
+use crate::piece::Color::*;
 use crate::square::Square;
 
 static ONE: u64 = 1;
 static ZERO: u64 = 0;
 
 pub struct Board {
-   bit_boards: HashMap<Color, HashMap<Piece, u64>>
+    bit_boards: HashMap<Piece, u64>,
 }
 
 fn square_occupied(bboard: u64, square: Square) -> bool {
@@ -20,95 +19,64 @@ fn square_occupied(bboard: u64, square: Square) -> bool {
 
 impl Board {
     pub fn new() -> Board {
-        let one_side_map = HashMap::from([
-            (Piece::PAWN, ZERO),
-            (Piece::KNIGHT, ZERO),
-            (Piece::BISHOP, ZERO),
-            (Piece::ROOK, ZERO),
-            (Piece::QUEEN, ZERO),
-            (Piece::KING, ZERO),
-        ]);
-        
         Board { 
-            bit_boards: HashMap::from([
-                (WHITE, one_side_map.clone()),
-                (BLACK, one_side_map), 
-            ])
+            bit_boards: HashMap::from_iter(
+                zip(PIECE_SET, repeat(ZERO))
+            )
         }
     }
-    
 
-
-    fn pieces_bit_board(&self, piece: Piece) -> u64 {
-        self.color_pieces_bit_board(BLACK, piece) 
-        | 
-        self.color_pieces_bit_board(WHITE, piece)
+    fn piece_set(&self) -> &[Piece] {
+        &PIECE_SET
     }
 
-    fn pieces_bit_board_mut(&mut self, piece: Piece) -> u64 {
-        self.color_pieces_bit_board_mut(BLACK, piece) 
-        | 
-        self.color_pieces_bit_board_mut(WHITE, piece)
-    }
-    
-    fn color_pieces_bit_board(&self, color: Color, piece: Piece) -> u64 {
-        *self.bit_boards.get(&color).unwrap()
-                        .get(&piece).unwrap()
+
+    fn piece_bit_board(&self, piece: Piece) -> u64 {
+        *self.bit_boards.get(&piece).unwrap()
     }
 
-    fn color_pieces_bit_board_mut(&mut self, color: Color, piece: Piece) -> u64 {
-        *self.bit_boards.get_mut(&color).unwrap()
-                        .get_mut(&piece).unwrap()
+    fn piece_bit_board_mut(&mut self, piece: Piece) -> u64 {
+        *self.bit_boards.get_mut(&piece).unwrap()
     }
     
-    fn set_color_pieces_bit_board(&mut self, color: Color, piece: Piece, bitboard: u64) -> () {
-        self.bit_boards.get_mut(&color).unwrap().insert(piece, bitboard);
+    fn set_piece_bit_board(&mut self, piece: Piece, bitboard: u64) -> () {
+        self.bit_boards.insert(piece, bitboard);
     }
 
-    pub fn color_all_pieces(self, color: Color) -> u64 {
+    pub fn all_bit_boards(&self) -> u64 {
         let mut result: u64 = 0;
 
-        for piece in Piece::iter() {
-            result = result | self.color_pieces_bit_board(color, piece);
-        }
-
-        result
-    }
-
-    pub fn all_pieces(self) -> u64 {
-        let mut result: u64 = 0;
-
-        for piece in Piece::iter() {
-            result = result | self.pieces_bit_board(piece);
+        for bitboard in self.bit_boards.values() {
+            result = result | bitboard;
         }
 
         result
     }
 
     pub fn put_piece_on_square(
-        &mut self, color: Color,piece: Piece, square: Square
+        &mut self, piece: Piece, square: Square
     ) -> Result<(), &str> {
-        let mut bboard = self.color_pieces_bit_board_mut(color, piece);
+        let mut bboard = self.piece_bit_board_mut(piece);
 
         if square_occupied(bboard, square) {
             return Err("Square occupied")
         } else {
             bboard = bboard | (ONE << square as u64);
-            self.set_color_pieces_bit_board(color, piece, bboard);
+            self.set_piece_bit_board(piece, bboard);
             Ok(())
         }
     }
 }
 
 fn fill_board_with_pawns(board: &mut Board) -> () {
-    let mut black_pawn_bit_board = board.color_pieces_bit_board_mut(BLACK, Piece::PAWN);
+    let mut black_pawn_bit_board = board.piece_bit_board_mut(Piece::PAWN(BLACK));
     
     for i in Square::B1 as u64 ..= Square::B8 as u64 {
         black_pawn_bit_board = black_pawn_bit_board | (ONE << i);
     }
     print_board(board);
     
-    board.set_color_pieces_bit_board(BLACK, Piece::PAWN, black_pawn_bit_board);
+    board.set_piece_bit_board(Piece::PAWN(BLACK), black_pawn_bit_board);
 }
 
 pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
@@ -119,8 +87,7 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
             i += c.to_digit(10).unwrap_or(0) as u64;
         } else {
             board.put_piece_on_square(
-                Color::from_char(c),
-                Piece::from_str(&c.to_string().to_lowercase()).unwrap(),
+                Piece::from_char(c).unwrap(),
                 Square::from_int(i).unwrap()
             ).unwrap();
             i += 1;
@@ -129,28 +96,26 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
 }
 
 pub fn print_board(board: &Board) -> () {
-    for piece in Piece::iter() {
-        let piece_bit_board = board.pieces_bit_board(piece);
-        
-        for i in 0 .. 64 {
-            if i % 8 == 0 && i > 0 {
-                print!("\n")
-            }
-            if (ONE << i & piece_bit_board) != 0 {
-                print!("{}", piece)
-            } else {
-                print!("-")
-            }
+    let piece_bit_board = board.all_bit_boards();
+    
+    for i in 0 .. 64 {
+        if i % 8 == 0 && i > 0 {
+            print!("\n")
         }
-        print!("\n#####next bit board#####\n")
-        
+        if (ONE << i & piece_bit_board) != 0 {
+            print!("1")
+        } else {
+            print!("0")
+        }
     }
-    return
+    print!("\n#####next bit board#####\n");
 }
 
 #[cfg(test)]
 mod test {
-    use super::{Board, fill_board_with_pawns, BLACK, Piece, ONE, Square};
+    use super::{Board, fill_board_with_pawns, BLACK, ONE};
+    use super::Piece::*;
+    use super::Square::*;
 
     #[test]
     fn test_fill_board_with_pawns() {
@@ -163,17 +128,17 @@ mod test {
             correct_result = correct_result | (ONE << i);
         }
 
-        assert_eq!(board.color_pieces_bit_board(BLACK, Piece::PAWN), correct_result)
+        assert_eq!(board.piece_bit_board(PAWN(BLACK)), correct_result)
     }
 
     #[test]
     fn test_put_piece_on_square() {
         let mut board = Board::new();
-        assert_eq!(board.color_pieces_bit_board(BLACK, Piece::ROOK), 0);
-        assert!(board.put_piece_on_square(BLACK, Piece::ROOK, Square::C6).is_ok());
-        assert_eq!(board.color_pieces_bit_board(BLACK,Piece::ROOK), ONE << Square::C6 as u64);
+        assert_eq!(board.piece_bit_board(ROOK(BLACK)), 0);
+        assert!(board.put_piece_on_square(ROOK(BLACK), C6).is_ok());
+        assert_eq!(board.piece_bit_board(ROOK(BLACK)), ONE << C6 as u64);
 
-        assert!(board.put_piece_on_square(BLACK, Piece::ROOK, Square::C6).is_err());
+        assert!(board.put_piece_on_square(ROOK(BLACK), C6).is_err());
     }
 }
 
