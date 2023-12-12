@@ -1,10 +1,10 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::iter::{zip, repeat};
 use int_enum::IntEnum;
 
 use crate::piece::{Piece, PIECE_SET};
 use crate::piece::Color::*;
-use crate::square::Square;
+use crate::square::*;
 
 static ONE: u64 = 1;
 static ZERO: u64 = 0;
@@ -26,10 +26,9 @@ impl Board {
         }
     }
 
-    fn piece_set(&self) -> &[Piece] {
+    fn piece_set() -> &'static[Piece] {
         &PIECE_SET
     }
-
 
     fn piece_bit_board(&self, piece: Piece) -> u64 {
         *self.bit_boards.get(&piece).unwrap()
@@ -42,6 +41,7 @@ impl Board {
     fn set_piece_bit_board(&mut self, piece: Piece, bitboard: u64) -> () {
         self.bit_boards.insert(piece, bitboard);
     }
+
 
     pub fn all_bit_boards(&self) -> u64 {
         let mut result: u64 = 0;

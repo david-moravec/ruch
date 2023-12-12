@@ -1,8 +1,9 @@
 use int_enum::IntEnum;
 use strum_macros::EnumIter;
+use std::{hash::Hash, task::Wake};
 
 #[repr(u64)]
-#[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum)]
+#[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum, Hash)]
 pub enum Square {
     A1 = 0, B1 = 8,  C1 = 16, D1 = 24, E1 = 32,F1 = 40, G1 = 48, H1 = 56,
     A2 = 1, B2 = 9,  C2 = 17, D2 = 25, E2 = 33,F2 = 41, G2 = 49, H2 = 57,
@@ -13,6 +14,7 @@ pub enum Square {
     A7 = 6, B7 = 14, C7 = 22, D7 = 30, E7 = 38,F7 = 46, G7 = 54, H7 = 62,
     A8 = 7, B8 = 15, C8 = 23, D8 = 31, E8 = 39,F8 = 47, G8 = 55, H8 = 63,
 }
+
 
 use Square::*;
 
@@ -34,3 +36,105 @@ impl TryFrom<u64> for Square {
     }
 }
 
+#[repr(u64)]
+#[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum, Hash)]
+pub enum File {
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
+    E = 4,
+    F = 5,
+    G = 6,
+    H = 7,
+}
+
+impl TryFrom<u64> for File {
+    type Error = &'static str;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(File::A),
+            1 => Ok(File::B),
+            2 => Ok(File::C),
+            3 => Ok(File::D),
+            4 => Ok(File::E),
+            5 => Ok(File::F),
+            6 => Ok(File::G),
+            7 => Ok(File::H),
+            _ => Err("Cannot convert given int to File"),
+        }
+    }
+}
+
+
+impl File {
+    pub fn squares(self) -> [Square; 8] {
+        match self{ 
+            File::A => [A1, A2, A3, A4, A5, A6, A7, A8],
+            File::B => [B1, B2, B3, B4, B5, B6, B7, B8],
+            File::C => [C1, C2, C3, C4, C5, C6, C7, C8],
+            File::D => [D1, D2, D3, D4, D5, D6, D7, D8],
+            File::E => [E1, E2, E3, E4, E5, E6, E7, E8],
+            File::F => [F1, F2, F3, F4, F5, F6, F7, F8],
+            File::G => [G1, G2, G3, G4, G5, G6, G7, G8],
+            File::H => [H1, H2, H3, H4, H5, H6, H7, H8],
+        }
+    }
+}
+
+#[repr(u64)]
+#[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum, Hash)]
+pub enum Rank {
+    ONE   = 0,
+    TWO   = 1,
+    THREE = 2,
+    FOUR  = 3,
+    FIVE  = 4,
+    SIX   = 5,
+    SEVEN = 6,
+    EIGHT = 7,
+}
+
+impl TryFrom<u64> for Rank {
+    type Error = &'static str;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Rank::ONE),
+            1 => Ok(Rank::TWO),
+            2 => Ok(Rank::THREE),
+            3 => Ok(Rank::FOUR),
+            4 => Ok(Rank::FIVE),
+            5 => Ok(Rank::SIX),
+            6 => Ok(Rank::SEVEN),
+            7 => Ok(Rank::EIGHT),
+            _ => Err("Cannot convert given int to File"),
+        }
+    }
+}
+
+impl Rank {
+    pub fn squares(self) -> [Square; 8] {
+        match self {
+           Rank::ONE   => [A1, B1, C1, D1, E1, F1, G1, H1],
+           Rank::TWO   => [A2, B2, C2, D2, E2, F2, G2, H2],
+           Rank::THREE => [A3, B3, C3, D3, E3, F3, G3, H3],
+           Rank::FOUR  => [A4, B4, C4, D4, E4, F4, G4, H4],
+           Rank::FIVE  => [A5, B5, C5, D5, E5, F5, G5, H5],
+           Rank::SIX   => [A6, B6, C6, D6, E6, F6, G6, H6],
+           Rank::SEVEN => [A7, B7, C7, D7, E7, F7, G7, H7],
+           Rank::EIGHT => [A8, B8, C8, D8, E8, F8, G8, H8],
+        }
+    }
+}
+
+impl Square {
+    pub fn rank(self) -> Option<Rank> {
+        Rank::try_from(self as u64 >> 3).ok() 
+    }
+
+    pub fn file(self) -> Option<File> {
+        File::try_from(self as u64 & 7).ok()
+    }
+}
