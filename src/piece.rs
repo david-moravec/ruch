@@ -52,7 +52,7 @@ impl Piece {
 pub struct ParsePieceError;
 
 impl Piece {
-    fn to_char(&self) -> char {
+    pub fn to_char(&self) -> char {
            match &self {
                PAWN(WHITE) => 'P',
                KNIGHT(WHITE) => 'N',

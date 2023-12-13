@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::iter::{zip, repeat};
 use int_enum::IntEnum;
+use strum::IntoEnumIterator;
 
 use crate::piece::{Piece, PIECE_SET};
 use crate::piece::Color::*;
@@ -66,6 +67,27 @@ impl Board {
             Ok(())
         }
     }
+
+    pub fn piece_on_square(&self, square: Square) -> Option<Piece> {
+        for (piece, bitboard) in &self.bit_boards {
+            if square_occupied(*bitboard, square){
+                return Some(*piece);
+            }
+        }
+
+        None
+    }
+
+    pub fn piecewise_representation(&self) -> [[Option<Piece>; 8]; 8] {
+        let mut result: [[Option<Piece>; 8]; 8] = [[None; 8]; 8]; 
+
+        for square in Square::iter() {
+            let rank_index = square.rank().unwrap() as usize;
+            let file_index = square.file().unwrap() as usize;
+            result[file_index][rank_index] = self.piece_on_square(square);
+        }
+        result
+    }
 }
 
 fn fill_board_with_pawns(board: &mut Board) -> () {
@@ -96,19 +118,18 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
 }
 
 pub fn print_board(board: &Board) -> () {
-    let piece_bit_board = board.all_bit_boards();
+    let piece_bit_board = board.piecewise_representation();
     
-    for i in 0 .. 64 {
-        if i % 8 == 0 && i > 0 {
-            print!("\n")
-        }
-        if (ONE << i & piece_bit_board) != 0 {
-            print!("1")
-        } else {
-            print!("0")
-        }
+    for rank in piece_bit_board {
+        for piece_opt in rank{
+            match piece_opt {
+                Some(piece) => print!("{}", piece.to_char()),
+                None => print!(" ")
+            }
+        } 
+
+        print!("\n")
     }
-    print!("\n#####next bit board#####\n");
 }
 
 #[cfg(test)]
