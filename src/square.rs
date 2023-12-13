@@ -131,10 +131,25 @@ impl Rank {
 
 impl Square {
     pub fn rank(self) -> Option<Rank> {
-        Rank::try_from(self as u64 >> 3).ok() 
+        Rank::try_from(self as u64 & 7).ok() 
     }
 
     pub fn file(self) -> Option<File> {
-        File::try_from(self as u64 & 7).ok()
+        File::try_from(self as u64 >> 3).ok()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Square, Rank, File};
+
+    #[test]
+    fn test_square_2_rank() {
+        assert_eq!(Square::B4.rank(), Some(Rank::FOUR));
+    }
+
+    #[test]
+    fn test_square_2_file() {
+        assert_eq!(Square::C4.file(), Some(File::C));
+    }
+} 
