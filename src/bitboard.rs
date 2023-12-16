@@ -9,6 +9,7 @@ use crate::square::*;
 static ONE: u64 = 1;
 static ZERO: u64 = 0;
 pub static DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+pub static OTHER_FEN: &str = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R";
 
 pub struct Board {
     bit_boards: HashMap<Piece, u64>,
@@ -60,7 +61,8 @@ impl Board {
         let mut bboard = self.piece_bit_board_mut(piece);
 
         if square_occupied(bboard, square) {
-            return Err("Square occupied")
+            eprintln!("Square {:?} occupied", square);
+            return Err("Square occupied");
         } else {
             bboard = bboard | (ONE << square as u64);
             self.set_piece_bit_board(piece, bboard);
