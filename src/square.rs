@@ -81,6 +81,19 @@ impl File {
             File::H => [H1, H2, H3, H4, H5, H6, H7, H8],
         }
     }
+     
+    pub fn to_char(self) -> char {
+        match self{
+            File::A => 'a',
+            File::B => 'b',
+            File::C => 'c',
+            File::D => 'd',
+            File::E => 'e',
+            File::F => 'f',
+            File::G => 'g',
+            File::H => 'h',
+        }
+    }
 }
 
 #[repr(u64)]
