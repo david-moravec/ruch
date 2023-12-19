@@ -38,7 +38,13 @@ pub enum Piece {
 use Piece::*;
 
 impl Piece {
-    pub fn move_bit_maps() -> u64 {0 as u64}
+    pub fn attacks() -> u64 {0 as u64}
+    //Outputs pseudo legal attacks
+
+    pub fn push() -> u64 {
+        // only for Pawn all other Pieces have all moves same as attacks
+        0 as u64
+    }
 
     pub fn color(&self) -> Color {
         match &self {

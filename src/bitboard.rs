@@ -32,7 +32,7 @@ impl Board {
         &PIECE_SET
     }
 
-    fn piece_bit_board(&self, piece: Piece) -> u64 {
+    pub fn piece_bit_board(&self, piece: Piece) -> u64 {
         *self.bit_boards.get(&piece).unwrap()
     }
 
@@ -40,7 +40,7 @@ impl Board {
         *self.bit_boards.get_mut(&piece).unwrap()
     }
     
-    fn set_piece_bit_board(&mut self, piece: Piece, bitboard: u64) -> () {
+    pub fn set_piece_bit_board(&mut self, piece: Piece, bitboard: u64) -> () {
         self.bit_boards.insert(piece, bitboard);
     }
 
@@ -95,7 +95,7 @@ impl Board {
 pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
     let mut i: u64 = 0;
 
-    for c in fen_string.replace("/", "").chars() {
+    for c in fen_string.replace("/", "").chars().rev() {
         if c.is_numeric() {
             i += c.to_digit(10).unwrap_or(0) as u64;
         } else {
@@ -111,16 +111,28 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
 pub fn print_board(board: &Board) -> () {
     let piece_bit_board = board.piecewise_representation();
     
-    for rank in piece_bit_board {
+    print!("  _________________\n");
+
+    for (i, rank) in piece_bit_board.iter().rev().enumerate() {
+        print!("{} ", 8 - i);
+
         for piece_opt in rank{
             match piece_opt {
-                Some(piece) => print!("{}", piece.to_char()),
-                None => print!(" ")
+                Some(piece) => print!("|{}", piece.to_char()),
+                None => print!("| ")
             }
         } 
-
-        print!("\n")
+        print!("|");
+        print!("\n  -----------------\n");
     }
+
+    print!("   ");
+    for i in 0..8 {
+        let file = File::try_from(i as u64).unwrap();
+        print!("{} ", file.to_char());
+    }
+
+    print!("\n\n\n")
 }
 
 #[cfg(test)]
@@ -131,8 +143,6 @@ mod test {
     use super::{Board, ONE, fill_board_fen, DEFAULT_FEN};
     use super::Piece::*;
     use super::Square::*;
-
-    use std::iter::zip;
 
     #[test]
     fn test_put_piece_on_square() {
