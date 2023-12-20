@@ -119,6 +119,57 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
     }
 }
 
+pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
+    // Used for quickly generating bitboard with a occupancy specified by 'X' or '.'.
+    // Inspired by cozy_chess bitboard! macro
+    let mut result = ZERO;
+
+    let mut s = s.to_string();
+
+    s.retain(|c| !c.is_whitespace());
+
+    // prepare reverse of lines
+    let s_rev = s.chars().collect::<Vec<char>>();
+
+    let mut s: Vec<char> = Vec::with_capacity(64);
+
+    // reverse the order of chunks
+    for chunk in s_rev.chunks(8).collect::<Vec<&[char]>>().iter().rev(){
+        s.extend(chunk.iter());
+    }
+
+    for (i, c) in s.iter().enumerate() {
+        match c {
+            'x' => result = result | ONE << i,
+            '.' => (),
+            _ => return Err("Unrecognized char use only 'x' for occupied square or '.' for empty square"),
+        }
+    };
+
+    Ok(result)
+}
+
+pub fn bitboard_to_str(bitboard: u64) -> String {
+    let mut result_unreversed: [char; 64] = ['.'; 64];
+
+    for square in Square::iter() {
+        if square_occupied(bitboard, square) {
+            result_unreversed[square as usize] = 'x';
+        }
+    } 
+
+    let mut result: Vec<char> = Vec::with_capacity(64);
+    let mut result: Vec<char> = Vec::new();
+
+    for chunk in result_unreversed.chunks(8).collect::<Vec<&[char]>>().iter().rev() {
+        result.extend(chunk.iter());
+        result.push('\n');
+    }
+
+    result.iter().collect()
+}
+
+
 pub fn print_board(board: &Board) -> () {
     let piece_bit_board = board.piecewise_representation();
     
@@ -151,7 +202,7 @@ mod test {
     use crate::piece::Color::{BLACK, WHITE};
     use crate::piece::Piece;
 
-    use super::{Board, ONE, fill_board_fen, DEFAULT_FEN};
+    use super::{Board, ONE, fill_board_fen, DEFAULT_FEN, bitboard_from_str, bitboard_to_str};
     use super::Piece::*;
     use super::Square::*;
 
@@ -181,7 +232,43 @@ mod test {
             [Some(ROOK(WHITE)), Some(KNIGHT(WHITE)), Some(BISHOP(WHITE)), Some(QUEEN(WHITE)), Some(KING(WHITE)), Some(BISHOP(WHITE)), Some(KNIGHT(WHITE)), Some(ROOK(WHITE))],
         ];
 
-        assert_eq!(starting_position, board.piecewise_representation())
+        assert_eq!(starting_position, board.piecewise_representation());
+    }
+
+    #[test]
+    fn test_bitboard_from_str() {
+        let correct = 4202769; 
+
+        assert_eq!(correct, bitboard_from_str("........
+                                               ........
+                                               ........
+                                               ........
+                                               ........
+                                               ......x.
+                                               x....x..
+                                               x...x...").unwrap()
+        )
+    }
+
+    #[test]
+    fn test_bitboard_to_str() {
+        let n: u64 = 4202769;
+        let string = "........
+                      ........
+                      ........
+                      ........
+                      ........
+                      ......x.
+                      x....x..
+                      x...x...";
+
+        let mut to_test = bitboard_to_str(n);
+        to_test.retain(|c| !c.is_whitespace());  
+
+        let mut correct = string.to_string();
+        correct.retain(|c| !c.is_whitespace());
+
+        assert_eq!(correct, to_test)
     }
 }
 
