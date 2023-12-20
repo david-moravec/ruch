@@ -1,7 +1,7 @@
 use crate::piece::Color;
 
-const NOT_A_FILE: u64 = 0xfefefefefefefefe;
-const NOT_H_FILE: u64 = 0x7f7f7f7f7f7f7f7f;
+pub const NOT_A_FILE: u64 = 0xfefefefefefefefe;
+pub const NOT_H_FILE: u64 = 0x7f7f7f7f7f7f7f7f;
 
 fn pawn_west_attacks(color: Color, pawn_bitboard: u64) -> u64 {
     match color {

@@ -7,7 +7,7 @@ use crate::piece::{Piece, PIECE_SET};
 use crate::square::*;
 
 static ONE: u64 = 1;
-static ZERO: u64 = 0;
+pub static ZERO: u64 = 0;
 pub static DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 pub struct Board {
@@ -18,13 +18,13 @@ fn square_occupied(bboard: u64, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
 }
 
-type BoardNested<T> = [[T; ROW_COUNT]; FILE_COUNT];
-fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
+pub type BoardNested<T> = [[T; ROW_COUNT]; FILE_COUNT];
+pub fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
     [[arg; ROW_COUNT]; FILE_COUNT]
 }
 
-type BoardFlat<T> = [T; SQUARE_COUNT];
-fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
+pub type BoardFlat<T> = [T; SQUARE_COUNT];
+pub fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
     [arg; SQUARE_COUNT]
 }
 
@@ -209,10 +209,11 @@ mod test {
     #[test]
     fn test_put_piece_on_square() {
         let mut board = Board::new();
+
         assert_eq!(board.piece_bit_board(ROOK(BLACK)), 0);
         assert!(board.put_piece_on_square(ROOK(BLACK), C6).is_ok());
-        assert_eq!(board.piece_bit_board(ROOK(BLACK)), ONE << C6 as u64);
 
+        assert_eq!(board.piece_bit_board(ROOK(BLACK)), ONE << C6 as u64);
         assert!(board.put_piece_on_square(ROOK(BLACK), C6).is_err());
     }
 
@@ -287,14 +288,16 @@ mod test {
     fn test_bitboard_from_str() {
         let correct = 4202769; 
 
-        assert_eq!(correct, bitboard_from_str("........
-                                               ........
-                                               ........
-                                               ........
-                                               ........
-                                               ......x.
-                                               x....x..
-                                               x...x...").unwrap()
+        assert_eq!(
+            correct,
+            bitboard_from_str("........
+                               ........
+                               ........
+                               ........
+                               ........
+                               ......x.
+                               x....x..
+                               x...x...").unwrap()
         ) 
     }
 
