@@ -158,7 +158,6 @@ pub fn bitboard_to_str(bitboard: u64) -> String {
         }
     } 
 
-    let mut result: Vec<char> = Vec::with_capacity(64);
     let mut result: Vec<char> = Vec::new();
 
     for chunk in result_unreversed.chunks(8).collect::<Vec<&[char]>>().iter().rev() {
@@ -199,6 +198,7 @@ pub fn print_board(board: &Board) -> () {
 
 #[cfg(test)]
 mod test {
+    use std::iter::zip;
     use crate::piece::Color::{BLACK, WHITE};
     use crate::piece::Piece;
 
@@ -233,6 +233,23 @@ mod test {
         ];
 
         assert_eq!(starting_position, board.piecewise_representation());
+
+        let mut board = Board::new();
+        fill_board_fen(&mut board, "8/8/3P2P1/8/PPP5/8/4P1P1/5P2");
+
+        let position: [[Option<Piece>; 8]; 8] = [
+            [None,              None,                None,                None,               None,              None,                None,                None],
+            [None,              None,                None,                None,               None,              None,                None,                None],
+            [None,              None,                None,                Some(PAWN(WHITE)),  None,              None,                Some(PAWN(WHITE)),   None],
+            [None,              None,                None,                None,               None,              None,                None,                None],
+            [Some(PAWN(WHITE)), Some(PAWN(WHITE)),   Some(PAWN(WHITE)),   None,               None,              None,                None,                None],
+            [None,              None,                None,                None,               None,              None,                None,                None],
+            [None,              None,                None,                None,               Some(PAWN(WHITE)), None,                Some(PAWN(WHITE)),   None],
+            [None,              None,                None,                None,               None,              Some(PAWN(WHITE)),   None,                None],
+        ];
+
+        assert_eq!(position, board.piecewise_representation());
+
     }
 
     #[test]
@@ -247,7 +264,7 @@ mod test {
                                                ......x.
                                                x....x..
                                                x...x...").unwrap()
-        )
+        ) 
     }
 
     #[test]
