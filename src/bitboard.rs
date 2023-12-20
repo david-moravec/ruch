@@ -79,13 +79,26 @@ impl Board {
     }
 
     pub fn piecewise_representation(&self) -> [[Option<Piece>; 8]; 8] {
-        let mut result: [[Option<Piece>; 8]; 8] = [[None; 8]; 8]; 
+        let mut result_flat: [Option<Piece>; 64] = [None; 64]; 
+        let mut result: [[Option<Piece>; 8]; 8] = [[None ; 8]; 8];
 
         for square in Square::iter() {
-            let rank_index = square.rank().unwrap() as usize;
-            let file_index = square.file().unwrap() as usize;
-            result[file_index][rank_index] = self.piece_on_square(square);
+            result_flat[square as usize] = self.piece_on_square(square);
         }
+
+        let mut v = Vec::with_capacity(64);
+
+        for chunk in result_flat.chunks(8) {
+            v.extend(chunk.iter().rev());
+        }
+
+        for (i, piece_opt) in v.iter().enumerate() {
+            let s = Square::try_from(i as u64).unwrap();
+            let rank = s.rank().unwrap() as usize;
+            let file = s.file().unwrap() as usize;
+            result[7-file][rank] = *piece_opt;
+        }
+
         result
     }
 }
