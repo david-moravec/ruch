@@ -18,6 +18,16 @@ fn square_occupied(bboard: u64, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
 }
 
+type BoardNested<T> = [[T; ROW_COUNT]; FILE_COUNT];
+fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
+    [[arg; ROW_COUNT]; FILE_COUNT]
+}
+
+type BoardFlat<T> = [T; SQUARE_COUNT];
+fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
+    [arg; SQUARE_COUNT]
+}
+
 impl Board {
     pub fn new() -> Board {
         Board { 
@@ -45,7 +55,7 @@ impl Board {
 
 
     pub fn all_bit_boards(&self) -> u64 {
-        let mut result: u64 = 0;
+        let mut result: u64 = ZERO;
 
         for bitboard in self.bit_boards.values() {
             result = result | bitboard;
@@ -78,9 +88,9 @@ impl Board {
         None
     }
 
-    pub fn piecewise_representation(&self) -> [[Option<Piece>; 8]; 8] {
-        let mut result_flat: [Option<Piece>; 64] = [None; 64]; 
-        let mut result: [[Option<Piece>; 8]; 8] = [[None ; 8]; 8];
+    pub fn piecewise_representation(&self) -> BoardNested<Option<Piece>> {
+        let mut result_flat = board_flat(None); 
+        let mut result = board_nested(None);
 
         for square in Square::iter() {
             result_flat[square as usize] = self.piece_on_square(square);
@@ -88,7 +98,7 @@ impl Board {
 
         let mut v = Vec::with_capacity(64);
 
-        for chunk in result_flat.chunks(8) {
+        for chunk in result_flat.chunks(ROW_COUNT) {
             v.extend(chunk.iter().rev());
         }
 
@@ -96,9 +106,10 @@ impl Board {
             let s = Square::try_from(i as u64).unwrap();
             let rank = s.rank().unwrap() as usize;
             let file = s.file().unwrap() as usize;
-            result[7-file][rank] = *piece_opt;
+            result[file][rank] = *piece_opt;
         }
 
+        result.reverse();
         result
     }
 }
@@ -123,18 +134,15 @@ pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     // Used for quickly generating bitboard with a occupancy specified by 'X' or '.'.
     // Inspired by cozy_chess bitboard! macro
     let mut result = ZERO;
-
+    
     let mut s = s.to_string();
-
     s.retain(|c| !c.is_whitespace());
-
-    // prepare reverse of lines
-    let s_rev = s.chars().collect::<Vec<char>>();
+    let s_vec = s.chars().collect::<Vec<char>>();
 
     let mut s: Vec<char> = Vec::with_capacity(64);
 
     // reverse the order of chunks
-    for chunk in s_rev.chunks(8).collect::<Vec<&[char]>>().iter().rev(){
+    for chunk in s_vec.chunks(ROW_COUNT).collect::<Vec<&[char]>>().iter().rev(){
         s.extend(chunk.iter());
     }
 
@@ -150,7 +158,7 @@ pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
 }
 
 pub fn bitboard_to_str(bitboard: u64) -> String {
-    let mut result_unreversed: [char; 64] = ['.'; 64];
+    let mut result_unreversed = board_flat('.');
 
     for square in Square::iter() {
         if square_occupied(bitboard, square) {
@@ -160,7 +168,7 @@ pub fn bitboard_to_str(bitboard: u64) -> String {
 
     let mut result: Vec<char> = Vec::new();
 
-    for chunk in result_unreversed.chunks(8).collect::<Vec<&[char]>>().iter().rev() {
+    for chunk in result_unreversed.chunks(ROW_COUNT).collect::<Vec<&[char]>>().iter().rev() {
         result.extend(chunk.iter());
         result.push('\n');
     }
@@ -175,7 +183,7 @@ pub fn print_board(board: &Board) -> () {
     print!("  _________________\n");
 
     for (i, rank) in piece_bit_board.iter().rev().enumerate() {
-        print!("{} ", 8 - i);
+        print!("{} ", FILE_COUNT - i);
 
         for piece_opt in rank{
             match piece_opt {
@@ -188,7 +196,7 @@ pub fn print_board(board: &Board) -> () {
     }
 
     print!("   ");
-    for i in 0..8 {
+    for i in 0..FILE_COUNT {
         let file = File::try_from(i as u64).unwrap();
         print!("{} ", file.to_char());
     }
@@ -198,9 +206,7 @@ pub fn print_board(board: &Board) -> () {
 
 #[cfg(test)]
 mod test {
-    use std::iter::zip;
     use crate::piece::Color::{BLACK, WHITE};
-    use crate::piece::Piece;
 
     use super::{Board, ONE, fill_board_fen, DEFAULT_FEN, bitboard_from_str, bitboard_to_str};
     use super::Piece::*;
@@ -221,7 +227,7 @@ mod test {
         let mut board = Board::new();
         fill_board_fen(&mut board, DEFAULT_FEN);
 
-        let starting_position: [[Option<Piece>; 8]; 8] = [
+        let starting_position = [
             [Some(ROOK(BLACK)), Some(KNIGHT(BLACK)), Some(BISHOP(BLACK)), Some(QUEEN(BLACK)), Some(KING(BLACK)), Some(BISHOP(BLACK)), Some(KNIGHT(BLACK)), Some(ROOK(BLACK))],
             [Some(PAWN(BLACK)), Some(PAWN(BLACK))  , Some(PAWN(BLACK))  , Some(PAWN(BLACK)) , Some(PAWN(BLACK)), Some(PAWN(BLACK))  , Some(PAWN(BLACK)),   Some(PAWN(BLACK))],
             [None,              None,                None,                None,               None,              None,                None,                None],
@@ -237,7 +243,7 @@ mod test {
         let mut board = Board::new();
         fill_board_fen(&mut board, "8/8/3P2P1/8/PPP5/8/4P1P1/5P2");
 
-        let position: [[Option<Piece>; 8]; 8] = [
+        let position = [
             [None,              None,                None,                None,               None,              None,                None,                None],
             [None,              None,                None,                None,               None,              None,                None,                None],
             [None,              None,                None,                Some(PAWN(WHITE)),  None,              None,                Some(PAWN(WHITE)),   None],

@@ -1,6 +1,10 @@
 use int_enum::IntEnum;
 use strum_macros::EnumIter;
-use std::{hash::Hash, task::Wake};
+use std::hash::Hash;
+
+pub const ROW_COUNT: usize = 8;
+pub const FILE_COUNT: usize = 8;
+pub const SQUARE_COUNT: usize = ROW_COUNT * FILE_COUNT;
 
 #[repr(u64)]
 #[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum, Hash)]
@@ -151,6 +155,7 @@ impl Square {
         File::try_from(self as u64 >> 3).ok()
     }
 }
+
 
 #[cfg(test)]
 mod tests {
