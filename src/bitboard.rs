@@ -133,28 +133,25 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
 pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     // Used for quickly generating bitboard with a occupancy specified by 'X' or '.'.
     // Inspired by cozy_chess bitboard! macro
-    let mut result = ZERO;
-    
+    //
+    let a = flatten_multiline_string_to_bitboard_repr(s.to_string());
+    Ok(
+        a.iter()
+         .enumerate()
+         .fold(ZERO, |acc, (i, c)| if *c == 'x' {acc | ONE << i} else {acc})
+    )
+}
+
+fn flatten_multiline_string_to_bitboard_repr(s: String) -> Vec<char> {
     let mut s = s.to_string();
     s.retain(|c| !c.is_whitespace());
-    let s_vec = s.chars().collect::<Vec<char>>();
-
-    let mut s: Vec<char> = Vec::with_capacity(64);
-
-    // reverse the order of chunks
-    for chunk in s_vec.chunks(ROW_COUNT).collect::<Vec<&[char]>>().iter().rev(){
-        s.extend(chunk.iter());
-    }
-
-    for (i, c) in s.iter().enumerate() {
-        match c {
-            'x' => result = result | ONE << i,
-            '.' => (),
-            _ => return Err("Unrecognized char use only 'x' for occupied square or '.' for empty square"),
-        }
-    };
-
-    Ok(result)
+    let s_vec: Vec<char> = s.chars().collect();
+    // reverse the order rows
+    s_vec.chunks(ROW_COUNT)
+         .rev()
+         .flat_map(|chunk| chunk.iter())
+         .map(|c| *c)
+         .collect()
 }
 
 pub fn bitboard_to_str(bitboard: u64) -> String {
@@ -166,14 +163,11 @@ pub fn bitboard_to_str(bitboard: u64) -> String {
         }
     } 
 
-    let mut result: Vec<char> = Vec::new();
-
-    for chunk in result_unreversed.chunks(ROW_COUNT).collect::<Vec<&[char]>>().iter().rev() {
-        result.extend(chunk.iter());
-        result.push('\n');
-    }
-
-    result.iter().collect()
+    result_unreversed.chunks(ROW_COUNT)
+                     .rev()
+                     .flat_map(|chunk| chunk.iter().chain(['\n'].iter()))
+                     .map(|c| *c)
+                     .collect()
 }
 
 
@@ -208,7 +202,7 @@ pub fn print_board(board: &Board) -> () {
 mod test {
     use crate::piece::Color::{BLACK, WHITE};
 
-    use super::{Board, ONE, fill_board_fen, DEFAULT_FEN, bitboard_from_str, bitboard_to_str};
+    use super::{Board, ONE, fill_board_fen, DEFAULT_FEN, bitboard_from_str, bitboard_to_str, flatten_multiline_string_to_bitboard_repr};
     use super::Piece::*;
     use super::Square::*;
 
@@ -255,6 +249,37 @@ mod test {
         ];
 
         assert_eq!(position, board.piecewise_representation());
+
+    }
+
+    #[test]
+    fn test_flatten_multiline_string_to_bitboard_repr() {
+        let correct: Vec<char> = Vec::from_iter(
+            ['x', '.', '.', '.', 'x', '.', '.', '.',
+             'x', '.', '.', '.', '.', 'x', '.', '.',
+             '.', '.', '.', '.', '.', '.', 'x', '.',
+             '.', '.', '.', '.', '.', '.', '.', '.',
+             '.', '.', '.', '.', '.', '.', '.', '.',
+             '.', '.', '.', '.', '.', '.', '.', '.',
+             '.', '.', '.', '.', '.', '.', '.', '.',
+             '.', '.', '.', '.', '.', '.', '.', '.',]
+            .iter()
+            .map(|c| *c)
+        );
+
+        assert_eq!(
+            correct,
+            flatten_multiline_string_to_bitboard_repr(
+                "........
+                 ........
+                 ........
+                 ........
+                 ........
+                 ......x.
+                 x....x..
+                 x...x...".to_string()
+            )
+        ) 
 
     }
 
