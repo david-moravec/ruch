@@ -134,7 +134,7 @@ pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     // Used for quickly generating bitboard with a occupancy specified by 'X' or '.'.
     // Inspired by cozy_chess bitboard! macro
     //
-    let a = flatten_multiline_string_to_bitboard_repr(s.to_string());
+    let a = flatten_multiline_string_to_bitboard_repr(s.to_string())?;
     Ok(
         a.iter()
          .enumerate()
@@ -142,16 +142,22 @@ pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     )
 }
 
-fn flatten_multiline_string_to_bitboard_repr(s: String) -> Vec<char> {
+fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'static str> {
     let mut s = s.to_string();
     s.retain(|c| !c.is_whitespace());
     let s_vec: Vec<char> = s.chars().collect();
-    // reverse the order rows
-    s_vec.chunks(ROW_COUNT)
-         .rev()
-         .flat_map(|chunk| chunk.iter())
-         .map(|c| *c)
-         .collect()
+
+    if s_vec.len() != 64 {
+        Err("String needs to have one character for each square")
+    } else {
+        Ok(
+            s_vec.chunks(ROW_COUNT)
+             .rev()
+             .flat_map(|chunk| chunk.iter())
+             .map(|c| *c)
+             .collect()
+        )
+    }
 }
 
 pub fn bitboard_to_str(bitboard: u64) -> String {
@@ -279,7 +285,7 @@ mod test {
                  ......x.
                  x....x..
                  x...x...".to_string()
-            )
+            ).unwrap()
         ) 
 
     }
@@ -298,6 +304,36 @@ mod test {
                                ......x.
                                x....x..
                                x...x...").unwrap()
+        );
+
+        let correct = 44272527353856;
+        let string = "........
+                      ........
+                      ...x.x..
+                      ..x...x.
+                      ........
+                      ..x...x.
+                      ...x.x..
+                      ........";
+
+        assert_eq!(
+            correct,
+            bitboard_from_str(string).unwrap()
+        ); 
+
+        let correct = 22136263676928;
+        let string = "........
+                      ........
+                      ..x.x...
+                      .x...x..
+                      ........
+                      .x...x..
+                      ..x.x...
+                      ........";
+
+        assert_eq!(
+            correct,
+            bitboard_from_str(string).unwrap()
         ) 
     }
 
@@ -312,6 +348,24 @@ mod test {
                       ......x.
                       x....x..
                       x...x...";
+
+        let mut to_test = bitboard_to_str(n);
+        to_test.retain(|c| !c.is_whitespace());  
+
+        let mut correct = string.to_string();
+        correct.retain(|c| !c.is_whitespace());
+
+        assert_eq!(correct, to_test);
+
+        let n: u64 = 44272527353856;
+        let string = "........
+                      ........
+                      ...x.x..
+                      ..x...x.
+                      ........
+                      ..x...x.
+                      ...x.x..
+                      ........";
 
         let mut to_test = bitboard_to_str(n);
         to_test.retain(|c| !c.is_whitespace());  
