@@ -155,7 +155,7 @@ impl Square {
         File::try_from(self as u64 >> 3).ok()
     }
      
-    pub fn as_bitboard(self) -> u64 {
+    pub const fn as_bitboard(self) -> u64 {
         1 << (self as u64)
     }
 }

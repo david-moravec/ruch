@@ -1,24 +1,25 @@
-use strum::IntoEnumIterator;
-
-use crate::bitboard::{ZERO, BoardFlat, board_flat, bitboard_from_str};
-use crate::square::Square;
+use crate::bitboard::{ZERO, BoardFlat, board_flat};
 use crate::attack_maps::pawn_attack::{NOT_A_FILE, NOT_H_FILE};
 
 const NOT_AB_FILE: u64 = NOT_A_FILE & NOT_A_FILE << 1;
 const NOT_GH_FILE: u64 = NOT_H_FILE & NOT_H_FILE >> 1;
 
-fn generate_knight_attacks() -> BoardFlat<u64> {
-    let mut result = board_flat(ZERO);
+const fn generate_knight_attacks() -> BoardFlat<u64> {
+    let mut result = board_flat(0);
+    let mut i = 0;
 
-    for square in Square::iter() {
-        result[square as usize] = calculate_knight_attack_set(square);
+    loop {
+        if i == 63 { 
+            return result
+        } else {
+            result[i as usize] = calculate_knight_attack_set(i);
+        }
+
+        i += 1;
     }
-    
-    result
 }
 
-fn calculate_knight_attack_set(square: Square) -> u64 {
-    let origin = square.as_bitboard();
+const fn calculate_knight_attack_set(origin: u64) -> u64 {
     let mut result = ZERO;
 
     result = result | (origin << 17 & NOT_A_FILE);
@@ -33,9 +34,11 @@ fn calculate_knight_attack_set(square: Square) -> u64 {
     result
 }
 
+pub const KNIGHT_ATTACKS: BoardFlat<u64> = generate_knight_attacks();
+
 #[cfg(test)]
 mod test {
-    use crate::bitboard::{bitboard_from_str, bitboard_to_str};
+    use crate::bitboard::bitboard_from_str;
     use crate::square::Square;
 
     use super::calculate_knight_attack_set;
@@ -53,7 +56,9 @@ mod test {
              ........"
         ).unwrap();   
 
-        let to_test = calculate_knight_attack_set(Square::D4);
+        let to_test = calculate_knight_attack_set(
+            Square::D4.as_bitboard()
+        );
         assert_eq!(attack_on_d4, to_test);
     }
 

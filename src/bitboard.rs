@@ -6,9 +6,9 @@ use strum::IntoEnumIterator;
 use crate::piece::{Piece, PIECE_SET};
 use crate::square::*;
 
-static ONE: u64 = 1;
-pub static ZERO: u64 = 0;
-pub static DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+const ONE: u64 = 1;
+pub const ZERO: u64 = 0;
+pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 pub struct Board {
     bit_boards: HashMap<Piece, u64>,
@@ -19,12 +19,12 @@ fn square_occupied(bboard: u64, square: Square) -> bool {
 }
 
 pub type BoardNested<T> = [[T; ROW_COUNT]; FILE_COUNT];
-pub fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
+pub const fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
     [[arg; ROW_COUNT]; FILE_COUNT]
 }
 
 pub type BoardFlat<T> = [T; SQUARE_COUNT];
-pub fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
+pub const fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
     [arg; SQUARE_COUNT]
 }
 
