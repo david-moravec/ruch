@@ -18,9 +18,15 @@ fn square_occupied(bboard: u64, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
 }
 
-pub type BoardNested<T> = [[T; ROW_COUNT]; FILE_COUNT];
-pub const fn board_nested<T: Copy>(arg: T) -> BoardNested<T> {
+pub type BoardSerialized<T> = [[T; ROW_COUNT]; FILE_COUNT];
+pub const fn board_serialized<T: Copy>(arg: T) -> BoardSerialized<T> {
     [[arg; ROW_COUNT]; FILE_COUNT]
+}
+
+fn rotate_serialized_board<T: Copy>(mut board: BoardSerialized<T>) -> BoardSerialized<T> {
+    board.reverse();
+    board.iter_mut().for_each(|rank| rank.reverse());
+    board
 }
 
 pub type BoardFlat<T> = [T; SQUARE_COUNT];
@@ -89,31 +95,25 @@ impl Board {
         None
     }
 
-    pub fn piecewise_representation(&self) -> BoardNested<Option<Piece>> {
+    pub fn piecewise_representation(&self) -> BoardSerialized<Option<Piece>> {
         let mut result_flat = board_flat(None); 
-        let mut result = board_nested(None);
+        let mut result = board_serialized(None);
 
         for square in Square::iter() {
             result_flat[square as usize] = self.piece_on_square(square);
         }
 
-        let mut v = Vec::with_capacity(64);
-
-        for chunk in result_flat.chunks(ROW_COUNT) {
-            v.extend(chunk.iter().rev());
-        }
-
-        for (i, piece_opt) in v.iter().enumerate() {
+        for (i, piece_opt) in result_flat.iter().enumerate() {
             let s = Square::try_from(i as u64).unwrap();
             let rank = s.rank().unwrap() as usize;
             let file = s.file().unwrap() as usize;
-            result[file][rank] = *piece_opt;
+            result[rank][file] = *piece_opt;
         }
 
-        result.reverse();
         result
     }
 }
+
 
 pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
     let mut i: u64 = 0;
@@ -153,10 +153,10 @@ fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'s
     } else {
         Ok(
             s_vec.chunks(ROW_COUNT)
-             .rev()
-             .flat_map(|chunk| chunk.iter())
-             .map(|c| *c)
-             .collect()
+                 .rev()
+                 .flat_map(|chunk| chunk.iter())
+                 .map(|c| *c)
+                 .collect()
         )
     }
 }
@@ -208,10 +208,38 @@ pub fn print_board(board: &Board) -> () {
 #[cfg(test)]
 mod test {
     use crate::piece::Color::{BLACK, WHITE};
+    use crate::piece::Piece;
 
-    use super::{Board, ONE, fill_board_fen, DEFAULT_FEN, bitboard_from_str, bitboard_to_str, flatten_multiline_string_to_bitboard_repr};
+    use super::{Board, ONE, BoardSerialized,  DEFAULT_FEN};
+    use super::{
+        fill_board_fen,
+        bitboard_from_str,
+        bitboard_to_str,
+        flatten_multiline_string_to_bitboard_repr,
+        board_serialized,
+        rotate_serialized_board};
     use super::Piece::*;
     use super::Square::*;
+
+    #[test]
+    fn test_rotate_serialized_board() {
+        let mut unrotated = board_serialized(0); 
+        unrotated[0][0] = 1; // 1.....2
+        unrotated[0][7] = 2; // .......
+        unrotated[7][0] = 3; // .......
+        unrotated[7][7] = 4; // 3.....4
+
+        let rotated = rotate_serialized_board(unrotated.clone());
+        // 4.....3
+        // .......
+        // .......
+        // 2.....1
+
+        assert_eq!(unrotated[0][0], rotated[7][7]);
+        assert_eq!(unrotated[0][7], rotated[7][0]);
+        assert_eq!(unrotated[7][0], rotated[0][7]);
+        assert_eq!(unrotated[7][7], rotated[0][0]);
+    }
 
     #[test]
     fn test_put_piece_on_square() {
@@ -222,6 +250,25 @@ mod test {
 
         assert_eq!(board.piece_bit_board(ROOK(BLACK)), ONE << C6 as u64);
         assert!(board.put_piece_on_square(ROOK(BLACK), C6).is_err());
+    }
+
+    #[test]
+    fn test_piecewise_representation() {
+        let mut board = Board::new();
+        let a1_b2_c3 = 262657; // A1, B2, C3
+        board.set_piece_bit_board(PAWN(BLACK), a1_b2_c3);
+        let f3_g2_h1 = 2113664; // F3, G2, H1
+        board.set_piece_bit_board(PAWN(WHITE), f3_g2_h1);
+
+        let mut position: BoardSerialized<Option<Piece>> = board_serialized(None);
+        position [0][0] = Some(PAWN(BLACK)); // A1
+        position [1][1] = Some(PAWN(BLACK)); // B2
+        position [2][2] = Some(PAWN(BLACK)); // C3
+        position [2][5] = Some(PAWN(WHITE)); // G3
+        position [1][6] = Some(PAWN(WHITE)); // F2
+        position [0][7] = Some(PAWN(WHITE)); // H1
+
+        assert_eq!(position, board.piecewise_representation());
     }
 
     #[test]
@@ -240,24 +287,7 @@ mod test {
             [Some(ROOK(WHITE)), Some(KNIGHT(WHITE)), Some(BISHOP(WHITE)), Some(QUEEN(WHITE)), Some(KING(WHITE)), Some(BISHOP(WHITE)), Some(KNIGHT(WHITE)), Some(ROOK(WHITE))],
         ];
 
-        assert_eq!(starting_position, board.piecewise_representation());
-
-        let mut board = Board::new();
-        fill_board_fen(&mut board, "8/8/3P2P1/8/PPP5/8/4P1P1/5P2");
-
-        let position = [
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                Some(PAWN(WHITE)),  None,              None,                Some(PAWN(WHITE)),   None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [Some(PAWN(WHITE)), Some(PAWN(WHITE)),   Some(PAWN(WHITE)),   None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               Some(PAWN(WHITE)), None,                Some(PAWN(WHITE)),   None],
-            [None,              None,                None,                None,               None,              Some(PAWN(WHITE)),   None,                None],
-        ];
-
-        assert_eq!(position, board.piecewise_representation());
-
+        assert_eq!(rotate_serialized_board(starting_position), board.piecewise_representation());
     }
 
     #[test]
