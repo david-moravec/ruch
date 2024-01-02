@@ -10,11 +10,10 @@ const ONE: u64 = 1;
 pub const ZERO: u64 = 0;
 pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-pub struct Board {
-    bit_boards: HashMap<Piece, u64>,
-}
+pub type BitBoard = u64;
 
-fn square_occupied(bboard: u64, square: Square) -> bool {
+
+fn square_occupied(bboard: BitBoard, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
 }
 
@@ -34,6 +33,10 @@ pub const fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
     [arg; SQUARE_COUNT]
 }
 
+pub struct Board {
+    bit_boards: HashMap<Piece, BitBoard>,
+}
+
 impl Board {
     pub fn new() -> Board {
         Board { 
@@ -47,20 +50,20 @@ impl Board {
         &PIECE_SET
     }
 
-    pub fn piece_bit_board(&self, piece: Piece) -> u64 {
+    pub fn piece_bit_board(&self, piece: Piece) -> BitBoard {
         *self.bit_boards.get(&piece).unwrap()
     }
 
-    fn piece_bit_board_mut(&mut self, piece: Piece) -> u64 {
+    fn piece_bit_board_mut(&mut self, piece: Piece) -> BitBoard {
         *self.bit_boards.get_mut(&piece).unwrap()
     }
     
-    pub fn set_piece_bit_board(&mut self, piece: Piece, bitboard: u64) -> () {
+    pub fn set_piece_bit_board(&mut self, piece: Piece, bitboard: BitBoard) -> () {
         self.bit_boards.insert(piece, bitboard);
     }
 
 
-    pub fn all_bit_boards(&self) -> u64 {
+    pub fn all_bit_boards(&self) -> BitBoard {
         let mut result: u64 = ZERO;
 
         for bitboard in self.bit_boards.values() {
@@ -161,7 +164,7 @@ fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'s
     }
 }
 
-pub fn bitboard_to_str(bitboard: u64) -> String {
+pub fn bitboard_to_str(bitboard: BitBoard) -> String {
     let mut result_unreversed = board_flat('.');
 
     for square in Square::iter() {

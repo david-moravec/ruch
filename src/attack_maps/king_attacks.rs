@@ -1,7 +1,7 @@
-use crate::bitboard::{ZERO, BoardFlat, board_flat};
+use crate::bitboard::{ZERO, BoardFlat, board_flat, BitBoard};
 use crate::attack_maps::pawn_attack::{NOT_A_FILE, NOT_H_FILE};
 
-const fn generate_king_attacks() -> BoardFlat<u64> {
+const fn generate_king_attacks() -> BoardFlat<BitBoard> {
     let mut result = board_flat(0);
     let mut i = 0;
 
@@ -16,7 +16,7 @@ const fn generate_king_attacks() -> BoardFlat<u64> {
     }
 }
 
-const fn calculate_king_attack_set(origin: u64) -> u64 {
+const fn calculate_king_attack_set(origin: BitBoard) -> BitBoard {
     let mut result = ZERO;
 
     result = result | (origin << 1 & NOT_H_FILE);
@@ -31,7 +31,7 @@ const fn calculate_king_attack_set(origin: u64) -> u64 {
     result
 }
 
-pub const KING_ATTACKS: BoardFlat<u64> = generate_king_attacks();
+pub const KING_ATTACKS: BoardFlat<BitBoard> = generate_king_attacks();
 
 #[cfg(test)]
 mod test {
