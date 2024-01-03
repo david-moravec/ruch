@@ -1,11 +1,9 @@
+mod attack_maps;
 mod bitboard;
 mod piece;
 mod square;
-mod attack_maps;
 
-
-use crate::bitboard::{Board, fill_board_fen, print_board, DEFAULT_FEN};
-
+use crate::bitboard::{fill_board_fen, print_board, Board, DEFAULT_FEN};
 
 fn main() {
     let mut board = Board::new();

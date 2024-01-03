@@ -1,5 +1,5 @@
-use crate::piece::Color;
 use crate::bitboard::BitBoard;
+use crate::piece::Color;
 
 pub const NOT_A_FILE: BitBoard = 0xfefefefefefefefe;
 pub const NOT_H_FILE: BitBoard = 0x7f7f7f7f7f7f7f7f;
@@ -32,13 +32,14 @@ pub fn pawn_single_attacks(color: Color, pawn_bitboard: BitBoard) -> BitBoard {
 
 #[cfg(test)]
 mod test {
-    use crate::piece::Color::*;
-    use crate::bitboard::bitboard_from_str;
     use super::pawn_west_attacks;
+    use crate::bitboard::bitboard_from_str;
+    use crate::piece::Color::*;
 
     #[test]
     fn test_west_pawn_attacks() {
-        let start_pos = bitboard_from_str("
+        let start_pos = bitboard_from_str(
+            "
             ........
             ........
             ........
@@ -47,9 +48,12 @@ mod test {
             .x......
             ....x...
             ........
-        ").unwrap();   
+        ",
+        )
+        .unwrap();
 
-        let west_attacks_black = bitboard_from_str("
+        let west_attacks_black = bitboard_from_str(
+            "
             ........
             ........
             ........
@@ -59,11 +63,14 @@ mod test {
             x.......
             ...x....
             
-        ").unwrap();
+        ",
+        )
+        .unwrap();
         let attacks = pawn_west_attacks(BLACK, start_pos);
         assert_eq!(west_attacks_black, attacks);
 
-        let west_attacks_white = bitboard_from_str("
+        let west_attacks_white = bitboard_from_str(
+            "
             ........
             ........
             ....x...
@@ -73,9 +80,10 @@ mod test {
             ........
             ........
             
-        ").unwrap();
+        ",
+        )
+        .unwrap();
         let attacks = pawn_west_attacks(WHITE, start_pos);
         assert_eq!(west_attacks_white, attacks);
-
     }
 }

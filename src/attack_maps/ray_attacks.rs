@@ -18,5 +18,3 @@ fn generate_ray_attack(origin: BitBoard) -> HashMap<RayDirection, BitBoard> {
 
     HashMap::from([(RayDirection::NORTH, 1 as BitBoard)])
 }
-
-

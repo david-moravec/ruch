@@ -1,13 +1,13 @@
-use crate::bitboard::{ZERO, BoardFlat, board_flat, BitBoard};
 use crate::attack_maps::pawn_attack::{NOT_A_FILE, NOT_H_FILE};
+use crate::bitboard::{board_flat, BitBoard, BoardFlat, ZERO};
 
 const fn generate_king_attacks() -> BoardFlat<BitBoard> {
     let mut result = board_flat(0);
     let mut i = 0;
 
     loop {
-        if i == 63 { 
-            return result
+        if i == 63 {
+            return result;
         } else {
             result[i as usize] = calculate_king_attack_set(i);
         }
@@ -50,17 +50,13 @@ mod test {
              .x.x....
              .xxx....
              ........
-             ........"
-        ).unwrap();   
+             ........",
+        )
+        .unwrap();
 
-        let to_test = calculate_king_attack_set(
-            Square::C4.as_bitboard()
-        );
+        let to_test = calculate_king_attack_set(Square::C4.as_bitboard());
         println!("{}", bitboard_to_str(Square::C4.as_bitboard()));
         println!("{}", Square::C4.as_bitboard());
         assert_eq!(attack_on_c4, to_test);
     }
-
 }
-
-

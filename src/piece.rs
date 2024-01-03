@@ -1,8 +1,7 @@
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Color {
     BLACK,
-    WHITE
+    WHITE,
 }
 
 use Color::*;
@@ -38,7 +37,9 @@ pub enum Piece {
 use Piece::*;
 
 impl Piece {
-    pub fn attacks() -> u64 {0 as u64}
+    pub fn attacks() -> u64 {
+        0 as u64
+    }
     //Outputs pseudo legal attacks
 
     pub fn push() -> u64 {
@@ -48,8 +49,10 @@ impl Piece {
 
     pub fn color(&self) -> Color {
         match &self {
-            PAWN(WHITE) | KNIGHT(WHITE) | BISHOP(WHITE) | ROOK(WHITE) | QUEEN(WHITE) | KING(WHITE) => WHITE,
-            PAWN(BLACK) | KNIGHT(BLACK) | BISHOP(BLACK) | ROOK(BLACK) | QUEEN(BLACK) | KING(BLACK) => BLACK,
+            PAWN(WHITE) | KNIGHT(WHITE) | BISHOP(WHITE) | ROOK(WHITE) | QUEEN(WHITE)
+            | KING(WHITE) => WHITE,
+            PAWN(BLACK) | KNIGHT(BLACK) | BISHOP(BLACK) | ROOK(BLACK) | QUEEN(BLACK)
+            | KING(BLACK) => BLACK,
         }
     }
 }
@@ -59,55 +62,54 @@ pub struct ParsePieceError;
 
 impl Piece {
     pub fn to_char(&self) -> char {
-           match &self {
-               PAWN(WHITE) => 'P',
-               KNIGHT(WHITE) => 'N',
-               BISHOP(WHITE) => 'B',
-               ROOK(WHITE) => 'R',
-               QUEEN(WHITE) => 'Q',
-               KING(WHITE) => 'K',
+        match &self {
+            PAWN(WHITE) => 'P',
+            KNIGHT(WHITE) => 'N',
+            BISHOP(WHITE) => 'B',
+            ROOK(WHITE) => 'R',
+            QUEEN(WHITE) => 'Q',
+            KING(WHITE) => 'K',
 
-               PAWN(BLACK) => 'p',
-               KNIGHT(BLACK) => 'n',
-               BISHOP(BLACK) => 'b',
-               ROOK(BLACK) => 'r',
-               QUEEN(BLACK) => 'q',
-               KING(BLACK) => 'k',
-           } 
+            PAWN(BLACK) => 'p',
+            KNIGHT(BLACK) => 'n',
+            BISHOP(BLACK) => 'b',
+            ROOK(BLACK) => 'r',
+            QUEEN(BLACK) => 'q',
+            KING(BLACK) => 'k',
+        }
     }
 
     pub fn from_char(c: char) -> Result<Self, ParsePieceError> {
         match c {
-           'P' => Ok(PAWN(WHITE)),
-           'N' => Ok(KNIGHT(WHITE)),
-           'B' => Ok(BISHOP(WHITE)),
-           'R' => Ok(ROOK(WHITE)),
-           'Q' => Ok(QUEEN(WHITE)),
-           'K' => Ok(KING(WHITE)),
+            'P' => Ok(PAWN(WHITE)),
+            'N' => Ok(KNIGHT(WHITE)),
+            'B' => Ok(BISHOP(WHITE)),
+            'R' => Ok(ROOK(WHITE)),
+            'Q' => Ok(QUEEN(WHITE)),
+            'K' => Ok(KING(WHITE)),
 
-           'p' => Ok(PAWN(BLACK)),
-           'n' => Ok(KNIGHT(BLACK)),
-           'b' => Ok(BISHOP(BLACK)),
-           'r' => Ok(ROOK(BLACK)),
-           'q' => Ok(QUEEN(BLACK)),
-           'k' => Ok(KING(BLACK)),
-           _ => Err(ParsePieceError),
-       } 
+            'p' => Ok(PAWN(BLACK)),
+            'n' => Ok(KNIGHT(BLACK)),
+            'b' => Ok(BISHOP(BLACK)),
+            'r' => Ok(ROOK(BLACK)),
+            'q' => Ok(QUEEN(BLACK)),
+            'k' => Ok(KING(BLACK)),
+            _ => Err(ParsePieceError),
+        }
     }
 }
 
 pub static PIECE_SET: [Piece; 12] = [
-           PAWN(WHITE),
-           KNIGHT(WHITE),
-           BISHOP(WHITE),
-           ROOK(WHITE),
-           QUEEN(WHITE),
-           KING(WHITE),
-           PAWN(BLACK),
-           KNIGHT(BLACK),
-           BISHOP(BLACK),
-           ROOK(BLACK),
-           QUEEN(BLACK),
-           KING(BLACK),
+    PAWN(WHITE),
+    KNIGHT(WHITE),
+    BISHOP(WHITE),
+    ROOK(WHITE),
+    QUEEN(WHITE),
+    KING(WHITE),
+    PAWN(BLACK),
+    KNIGHT(BLACK),
+    BISHOP(BLACK),
+    ROOK(BLACK),
+    QUEEN(BLACK),
+    KING(BLACK),
 ];
-

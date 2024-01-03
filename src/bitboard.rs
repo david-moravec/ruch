@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use std::iter::{zip, repeat};
 use int_enum::IntEnum;
+use std::collections::HashMap;
+use std::iter::{repeat, zip};
 use strum::IntoEnumIterator;
 
 use crate::piece::{Piece, PIECE_SET};
@@ -11,7 +11,6 @@ pub const ZERO: u64 = 0;
 pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 pub type BitBoard = u64;
-
 
 fn square_occupied(bboard: BitBoard, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
@@ -39,14 +38,12 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Board {
-        Board { 
-            bit_boards: HashMap::from_iter(
-                zip(PIECE_SET, repeat(ZERO))
-            )
+        Board {
+            bit_boards: HashMap::from_iter(zip(PIECE_SET, repeat(ZERO))),
         }
     }
 
-    fn piece_set() -> &'static[Piece] {
+    fn piece_set() -> &'static [Piece] {
         &PIECE_SET
     }
 
@@ -57,11 +54,10 @@ impl Board {
     fn piece_bit_board_mut(&mut self, piece: Piece) -> BitBoard {
         *self.bit_boards.get_mut(&piece).unwrap()
     }
-    
+
     pub fn set_piece_bit_board(&mut self, piece: Piece, bitboard: BitBoard) -> () {
         self.bit_boards.insert(piece, bitboard);
     }
-
 
     pub fn all_bit_boards(&self) -> BitBoard {
         let mut result: u64 = ZERO;
@@ -73,9 +69,7 @@ impl Board {
         result
     }
 
-    pub fn put_piece_on_square(
-        &mut self, piece: Piece, square: Square
-    ) -> Result<(), &str> {
+    pub fn put_piece_on_square(&mut self, piece: Piece, square: Square) -> Result<(), &str> {
         let mut bboard = self.piece_bit_board_mut(piece);
 
         if square_occupied(bboard, square) {
@@ -90,7 +84,7 @@ impl Board {
 
     pub fn piece_on_square(&self, square: Square) -> Option<Piece> {
         for (piece, bitboard) in &self.bit_boards {
-            if square_occupied(*bitboard, square){
+            if square_occupied(*bitboard, square) {
                 return Some(*piece);
             }
         }
@@ -99,7 +93,7 @@ impl Board {
     }
 
     pub fn piecewise_representation(&self) -> BoardSerialized<Option<Piece>> {
-        let mut result_flat = board_flat(None); 
+        let mut result_flat = board_flat(None);
         let mut result = board_serialized(None);
 
         for square in Square::iter() {
@@ -117,7 +111,6 @@ impl Board {
     }
 }
 
-
 pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
     let mut i: u64 = 0;
 
@@ -125,10 +118,9 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
         if c.is_numeric() {
             i += c.to_digit(10).unwrap_or(0) as u64;
         } else {
-            board.put_piece_on_square(
-                Piece::from_char(c).unwrap(),
-                Square::from_int(i).unwrap()
-            ).unwrap();
+            board
+                .put_piece_on_square(Piece::from_char(c).unwrap(), Square::from_int(i).unwrap())
+                .unwrap();
             i += 1;
         }
     }
@@ -139,11 +131,10 @@ pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     // Inspired by cozy_chess bitboard! macro
     //
     let a = flatten_multiline_string_to_bitboard_repr(s.to_string())?;
-    Ok(
-        a.iter()
-         .enumerate()
-         .fold(ZERO, |acc, (i, c)| if *c == 'x' {acc | ONE << i} else {acc})
-    )
+    Ok(a.iter().enumerate().fold(
+        ZERO,
+        |acc, (i, c)| if *c == 'x' { acc | ONE << i } else { acc },
+    ))
 }
 
 fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'static str> {
@@ -154,13 +145,12 @@ fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'s
     if s_vec.len() != 64 {
         Err("String needs to have one character for each square")
     } else {
-        Ok(
-            s_vec.chunks(ROW_COUNT)
-                 .rev()
-                 .flat_map(|chunk| chunk.iter())
-                 .map(|c| *c)
-                 .collect()
-        )
+        Ok(s_vec
+            .chunks(ROW_COUNT)
+            .rev()
+            .flat_map(|chunk| chunk.iter())
+            .map(|c| *c)
+            .collect())
     }
 }
 
@@ -171,30 +161,30 @@ pub fn bitboard_to_str(bitboard: BitBoard) -> String {
         if square_occupied(bitboard, square) {
             result_unreversed[square as usize] = 'x';
         }
-    } 
+    }
 
-    result_unreversed.chunks(ROW_COUNT)
-                     .rev()
-                     .flat_map(|chunk| chunk.iter().chain(['\n'].iter()))
-                     .map(|c| *c)
-                     .collect()
+    result_unreversed
+        .chunks(ROW_COUNT)
+        .rev()
+        .flat_map(|chunk| chunk.iter().chain(['\n'].iter()))
+        .map(|c| *c)
+        .collect()
 }
-
 
 pub fn print_board(board: &Board) -> () {
     let piece_bit_board = board.piecewise_representation();
-    
+
     print!("  _________________\n");
 
     for (i, rank) in piece_bit_board.iter().rev().enumerate() {
         print!("{} ", FILE_COUNT - i);
 
-        for piece_opt in rank{
+        for piece_opt in rank {
             match piece_opt {
                 Some(piece) => print!("|{}", piece.to_char()),
-                None => print!("| ")
+                None => print!("| "),
             }
-        } 
+        }
         print!("|");
         print!("\n  -----------------\n");
     }
@@ -213,20 +203,17 @@ mod test {
     use crate::piece::Color::{BLACK, WHITE};
     use crate::piece::Piece;
 
-    use super::{Board, ONE, BoardSerialized,  DEFAULT_FEN};
-    use super::{
-        fill_board_fen,
-        bitboard_from_str,
-        bitboard_to_str,
-        flatten_multiline_string_to_bitboard_repr,
-        board_serialized,
-        rotate_serialized_board};
     use super::Piece::*;
     use super::Square::*;
+    use super::{
+        bitboard_from_str, bitboard_to_str, board_serialized, fill_board_fen,
+        flatten_multiline_string_to_bitboard_repr, rotate_serialized_board,
+    };
+    use super::{Board, BoardSerialized, DEFAULT_FEN, ONE};
 
     #[test]
     fn test_rotate_serialized_board() {
-        let mut unrotated = board_serialized(0); 
+        let mut unrotated = board_serialized(0);
         unrotated[0][0] = 1; // 1.....2
         unrotated[0][7] = 2; // .......
         unrotated[7][0] = 3; // .......
@@ -264,12 +251,12 @@ mod test {
         board.set_piece_bit_board(PAWN(WHITE), f3_g2_h1);
 
         let mut position: BoardSerialized<Option<Piece>> = board_serialized(None);
-        position [0][0] = Some(PAWN(BLACK)); // A1
-        position [1][1] = Some(PAWN(BLACK)); // B2
-        position [2][2] = Some(PAWN(BLACK)); // C3
-        position [2][5] = Some(PAWN(WHITE)); // G3
-        position [1][6] = Some(PAWN(WHITE)); // F2
-        position [0][7] = Some(PAWN(WHITE)); // H1
+        position[0][0] = Some(PAWN(BLACK)); // A1
+        position[1][1] = Some(PAWN(BLACK)); // B2
+        position[2][2] = Some(PAWN(BLACK)); // C3
+        position[2][5] = Some(PAWN(WHITE)); // G3
+        position[1][6] = Some(PAWN(WHITE)); // F2
+        position[0][7] = Some(PAWN(WHITE)); // H1
 
         assert_eq!(position, board.piecewise_representation());
     }
@@ -280,32 +267,69 @@ mod test {
         fill_board_fen(&mut board, DEFAULT_FEN);
 
         let starting_position = [
-            [Some(ROOK(BLACK)), Some(KNIGHT(BLACK)), Some(BISHOP(BLACK)), Some(QUEEN(BLACK)), Some(KING(BLACK)), Some(BISHOP(BLACK)), Some(KNIGHT(BLACK)), Some(ROOK(BLACK))],
-            [Some(PAWN(BLACK)), Some(PAWN(BLACK))  , Some(PAWN(BLACK))  , Some(PAWN(BLACK)) , Some(PAWN(BLACK)), Some(PAWN(BLACK))  , Some(PAWN(BLACK)),   Some(PAWN(BLACK))],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [None,              None,                None,                None,               None,              None,                None,                None],
-            [Some(PAWN(WHITE)), Some(PAWN(WHITE))  , Some(PAWN(WHITE))  , Some(PAWN(WHITE)) , Some(PAWN(WHITE)), Some(PAWN(WHITE))  , Some(PAWN(WHITE)),   Some(PAWN(WHITE))],
-            [Some(ROOK(WHITE)), Some(KNIGHT(WHITE)), Some(BISHOP(WHITE)), Some(QUEEN(WHITE)), Some(KING(WHITE)), Some(BISHOP(WHITE)), Some(KNIGHT(WHITE)), Some(ROOK(WHITE))],
+            [
+                Some(ROOK(BLACK)),
+                Some(KNIGHT(BLACK)),
+                Some(BISHOP(BLACK)),
+                Some(QUEEN(BLACK)),
+                Some(KING(BLACK)),
+                Some(BISHOP(BLACK)),
+                Some(KNIGHT(BLACK)),
+                Some(ROOK(BLACK)),
+            ],
+            [
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+                Some(PAWN(BLACK)),
+            ],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+                Some(PAWN(WHITE)),
+            ],
+            [
+                Some(ROOK(WHITE)),
+                Some(KNIGHT(WHITE)),
+                Some(BISHOP(WHITE)),
+                Some(QUEEN(WHITE)),
+                Some(KING(WHITE)),
+                Some(BISHOP(WHITE)),
+                Some(KNIGHT(WHITE)),
+                Some(ROOK(WHITE)),
+            ],
         ];
 
-        assert_eq!(rotate_serialized_board(starting_position), board.piecewise_representation());
+        assert_eq!(
+            rotate_serialized_board(starting_position),
+            board.piecewise_representation()
+        );
     }
 
     #[test]
     fn test_flatten_multiline_string_to_bitboard_repr() {
         let correct: Vec<char> = Vec::from_iter(
-            ['x', '.', '.', '.', 'x', '.', '.', '.',
-             'x', '.', '.', '.', '.', 'x', '.', '.',
-             '.', '.', '.', '.', '.', '.', 'x', '.',
-             '.', '.', '.', '.', '.', '.', '.', '.',
-             '.', '.', '.', '.', '.', '.', '.', '.',
-             '.', '.', '.', '.', '.', '.', '.', '.',
-             '.', '.', '.', '.', '.', '.', '.', '.',
-             '.', '.', '.', '.', '.', '.', '.', '.',]
+            [
+                'x', '.', '.', '.', 'x', '.', '.', '.', 'x', '.', '.', '.', '.', 'x', '.', '.',
+                '.', '.', '.', '.', '.', '.', 'x', '.', '.', '.', '.', '.', '.', '.', '.', '.',
+                '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.',
+                '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.',
+            ]
             .iter()
-            .map(|c| *c)
+            .map(|c| *c),
         );
 
         assert_eq!(
@@ -318,26 +342,30 @@ mod test {
                  ........
                  ......x.
                  x....x..
-                 x...x...".to_string()
-            ).unwrap()
-        ) 
-
+                 x...x..."
+                    .to_string()
+            )
+            .unwrap()
+        )
     }
 
     #[test]
     fn test_bitboard_from_str() {
-        let correct = 4202769; 
+        let correct = 4202769;
 
         assert_eq!(
             correct,
-            bitboard_from_str("........
+            bitboard_from_str(
+                "........
                                ........
                                ........
                                ........
                                ........
                                ......x.
                                x....x..
-                               x...x...").unwrap()
+                               x...x..."
+            )
+            .unwrap()
         );
 
         let correct = 44272527353856;
@@ -350,10 +378,7 @@ mod test {
                       ...x.x..
                       ........";
 
-        assert_eq!(
-            correct,
-            bitboard_from_str(string).unwrap()
-        ); 
+        assert_eq!(correct, bitboard_from_str(string).unwrap());
 
         let correct = 22136263676928;
         let string = "........
@@ -365,10 +390,7 @@ mod test {
                       ..x.x...
                       ........";
 
-        assert_eq!(
-            correct,
-            bitboard_from_str(string).unwrap()
-        ) 
+        assert_eq!(correct, bitboard_from_str(string).unwrap())
     }
 
     #[test]
@@ -384,7 +406,7 @@ mod test {
                       x...x...";
 
         let mut to_test = bitboard_to_str(n);
-        to_test.retain(|c| !c.is_whitespace());  
+        to_test.retain(|c| !c.is_whitespace());
 
         let mut correct = string.to_string();
         correct.retain(|c| !c.is_whitespace());
@@ -402,7 +424,7 @@ mod test {
                       ........";
 
         let mut to_test = bitboard_to_str(n);
-        to_test.retain(|c| !c.is_whitespace());  
+        to_test.retain(|c| !c.is_whitespace());
 
         let mut correct = string.to_string();
         correct.retain(|c| !c.is_whitespace());
@@ -410,4 +432,3 @@ mod test {
         assert_eq!(correct, to_test)
     }
 }
-
