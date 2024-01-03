@@ -1,8 +1,6 @@
 use crate::bitboard::BitBoard;
+use crate::constants::{NOT_A_FILE, NOT_H_FILE};
 use crate::piece::Color;
-
-pub const NOT_A_FILE: BitBoard = 0xfefefefefefefefe;
-pub const NOT_H_FILE: BitBoard = 0x7f7f7f7f7f7f7f7f;
 
 fn pawn_west_attacks(color: Color, pawn_bitboard: BitBoard) -> BitBoard {
     match color {

@@ -1,8 +1,5 @@
-use crate::attack_maps::pawn_attack::{NOT_A_FILE, NOT_H_FILE};
-use crate::bitboard::{board_flat, BitBoard, BoardFlat, ZERO};
-
-const NOT_AB_FILE: u64 = NOT_A_FILE & NOT_A_FILE << 1;
-const NOT_GH_FILE: u64 = NOT_H_FILE & NOT_H_FILE >> 1;
+use crate::bitboard::{board_flat, BitBoard, BoardFlat};
+use crate::constants::{NOT_AB_FILE, NOT_A_FILE, NOT_GH_FILE, NOT_H_FILE, ZERO};
 
 const fn generate_knight_attacks() -> BoardFlat<BitBoard> {
     let mut result = board_flat(0);

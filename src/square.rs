@@ -2,10 +2,6 @@ use int_enum::IntEnum;
 use std::hash::Hash;
 use strum_macros::EnumIter;
 
-pub const ROW_COUNT: usize = 8;
-pub const FILE_COUNT: usize = 8;
-pub const SQUARE_COUNT: usize = ROW_COUNT * FILE_COUNT;
-
 #[repr(u64)]
 #[derive(EnumIter, Clone, Copy, Debug, Eq, PartialEq, IntEnum, Hash)]
 pub enum Square {

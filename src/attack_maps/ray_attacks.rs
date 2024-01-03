@@ -13,7 +13,7 @@ enum RayDirection {
     NOWEST,
 }
 
-fn generate_ray_attack(origin: BitBoard) -> HashMap<RayDirection, BitBoard> {
+fn calculate_ray_attacks_for_each_direction(origin: BitBoard) -> HashMap<RayDirection, BitBoard> {
     let mut result = board_flat(0 as u64);
 
     HashMap::from([(RayDirection::NORTH, 1 as BitBoard)])

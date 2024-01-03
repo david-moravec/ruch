@@ -3,12 +3,9 @@ use std::collections::HashMap;
 use std::iter::{repeat, zip};
 use strum::IntoEnumIterator;
 
+use crate::constants::{FILE_COUNT, ONE, ROW_COUNT, SQUARE_COUNT, ZERO};
 use crate::piece::{Piece, PIECE_SET};
 use crate::square::*;
-
-const ONE: u64 = 1;
-pub const ZERO: u64 = 0;
-pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 pub type BitBoard = u64;
 
@@ -200,6 +197,7 @@ pub fn print_board(board: &Board) -> () {
 
 #[cfg(test)]
 mod test {
+    use crate::constants::{DEFAULT_FEN, ONE};
     use crate::piece::Color::{BLACK, WHITE};
     use crate::piece::Piece;
 
@@ -209,7 +207,7 @@ mod test {
         bitboard_from_str, bitboard_to_str, board_serialized, fill_board_fen,
         flatten_multiline_string_to_bitboard_repr, rotate_serialized_board,
     };
-    use super::{Board, BoardSerialized, DEFAULT_FEN, ONE};
+    use super::{Board, BoardSerialized};
 
     #[test]
     fn test_rotate_serialized_board() {

@@ -1,5 +1,5 @@
-use crate::attack_maps::pawn_attack::{NOT_A_FILE, NOT_H_FILE};
-use crate::bitboard::{board_flat, BitBoard, BoardFlat, ZERO};
+use crate::bitboard::{board_flat, BitBoard, BoardFlat};
+use crate::constants::{NOT_A_FILE, NOT_H_FILE, ZERO};
 
 const fn generate_king_attacks() -> BoardFlat<BitBoard> {
     let mut result = board_flat(0);
