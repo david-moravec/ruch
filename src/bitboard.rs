@@ -203,11 +203,7 @@ mod test {
 
     use super::Piece::*;
     use super::Square::*;
-    use super::{
-        bitboard_from_str, bitboard_to_str, board_serialized, fill_board_fen,
-        flatten_multiline_string_to_bitboard_repr, rotate_serialized_board,
-    };
-    use super::{Board, BoardSerialized};
+    use super::*;
 
     #[test]
     fn test_rotate_serialized_board() {
@@ -355,13 +351,13 @@ mod test {
             correct,
             bitboard_from_str(
                 "........
-                               ........
-                               ........
-                               ........
-                               ........
-                               ......x.
-                               x....x..
-                               x...x..."
+                 ........
+                 ........
+                 ........
+                 ........
+                 ......x.
+                 x....x..
+                 x...x..."
             )
             .unwrap()
         );

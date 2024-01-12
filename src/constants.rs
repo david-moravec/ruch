@@ -8,7 +8,9 @@ pub const ROW_COUNT: usize = 8;
 pub const FILE_COUNT: usize = 8;
 pub const SQUARE_COUNT: usize = ROW_COUNT * FILE_COUNT;
 
-pub const NOT_A_FILE: BitBoard = 0xfefefefefefefefe;
-pub const NOT_H_FILE: BitBoard = 0x7f7f7f7f7f7f7f7f;
-pub const NOT_AB_FILE: u64 = NOT_A_FILE & NOT_A_FILE << 1;
-pub const NOT_GH_FILE: u64 = NOT_H_FILE & NOT_H_FILE >> 1;
+pub const A_FILE: BitBoard = 0x0101010101010100;
+pub const H_FILE: BitBoard = 0x8080808080808000;
+pub const NOT_A_FILE: BitBoard = !A_FILE;
+pub const NOT_H_FILE: BitBoard = !H_FILE;
+pub const NOT_AB_FILE: BitBoard = NOT_A_FILE & NOT_A_FILE << 1;
+pub const NOT_GH_FILE: BitBoard = NOT_H_FILE & NOT_H_FILE >> 1;
