@@ -10,6 +10,10 @@ pub const SQUARE_COUNT: usize = ROW_COUNT * FILE_COUNT;
 
 pub const A_FILE: BitBoard = 0x0101010101010100;
 pub const H_FILE: BitBoard = 0x8080808080808000;
+pub const ONE_RANK: BitBoard = 0x00000000000000FF;
+pub const EIGHT_RANK: BitBoard = 0xFF00000000000000;
+pub const A1_H8_DIAG: BitBoard = 0x8040201008040201;
+pub const H1_A8_DIAG: BitBoard = 0x0102040810204080;
 pub const NOT_A_FILE: BitBoard = !A_FILE;
 pub const NOT_H_FILE: BitBoard = !H_FILE;
 pub const NOT_AB_FILE: BitBoard = NOT_A_FILE & NOT_A_FILE << 1;
