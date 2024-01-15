@@ -36,7 +36,7 @@ pub const KNIGHT_ATTACKS: BoardFlat<BitBoard> = generate_knight_attacks();
 #[cfg(test)]
 mod test {
     use crate::bitboard::bitboard_from_str;
-    use crate::square::Square;
+    use crate::types::square::Square;
 
     use super::calculate_knight_attack_set;
 

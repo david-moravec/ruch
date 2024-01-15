@@ -5,7 +5,8 @@ use strum::IntoEnumIterator;
 
 use crate::constants::{FILE_COUNT, ONE, ROW_COUNT, SQUARE_COUNT, ZERO};
 use crate::piece::{Piece, PIECE_SET};
-use crate::square::*;
+use crate::types::file::File;
+use crate::types::square::Square;
 
 pub type BitBoard = u64;
 

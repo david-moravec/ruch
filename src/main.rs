@@ -2,7 +2,7 @@ mod attack_maps;
 mod bitboard;
 mod constants;
 mod piece;
-mod square;
+mod types;
 
 use crate::bitboard::{fill_board_fen, print_board, Board};
 use crate::constants::DEFAULT_FEN;
