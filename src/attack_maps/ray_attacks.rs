@@ -1,6 +1,6 @@
 use crate::{
     bitboard::{board_flat, BitBoard},
-    constants::{A_FILE, H_FILE},
+    constants::{A1_H8_DIAG, A_FILE, H_FILE},
 };
 use std::collections::HashMap;
 
@@ -22,12 +22,17 @@ fn calculate_ray_attacks_for_each_direction(origin: BitBoard) -> HashMap<RayDire
     let leading_zeros: u32 = origin.leading_zeros();
 
     result.insert(RayDirection::NORTH, {
-        let source: BitBoard = A_FILE;
+        let source: BitBoard = A_FILE << 8;
         source << trailing_zeros
     });
 
     result.insert(RayDirection::SOUTH, {
         let source: BitBoard = H_FILE >> 8;
+        source >> leading_zeros
+    });
+
+    result.insert(RayDirection::NOEAST, {
+        let source: BitBoard = A1_H8_DIAG;
         source >> leading_zeros
     });
 
