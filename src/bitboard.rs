@@ -123,6 +123,14 @@ pub fn fill_board_fen(board: &mut Board, fen_string: &str) -> () {
     }
 }
 
+pub fn shift_south(bitboard: BitBoard, rank_count: usize) -> BitBoard {
+    bitboard >> rank_count * 8
+}
+
+pub fn shift_north(bitboard: BitBoard, rank_count: usize) -> BitBoard {
+    bitboard << rank_count * 8
+}
+
 pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
     // Used for quickly generating bitboard with a occupancy specified by 'X' or '.'.
     // Inspired by cozy_chess bitboard! macro
@@ -197,7 +205,7 @@ pub fn print_board(board: &Board) -> () {
 
 #[cfg(test)]
 mod test {
-    use crate::constants::{DEFAULT_FEN, ONE};
+    use crate::constants::{DEFAULT_FEN, ONE, ONE_RANK, SIX_RANK, THREE_RANK, TWO_RANK};
     use crate::piece::Color::{BLACK, WHITE};
     use crate::piece::Piece;
 
@@ -424,5 +432,17 @@ mod test {
         correct.retain(|c| !c.is_whitespace());
 
         assert_eq!(correct, to_test)
+    }
+
+    #[test]
+    fn test_shift_south() {
+        assert_eq!(shift_south(TWO_RANK, 1), ONE_RANK);
+        assert_eq!(shift_south(SIX_RANK, 4), TWO_RANK);
+    }
+
+    #[test]
+    fn test_shift_north() {
+        assert_eq!(shift_north(TWO_RANK, 1), THREE_RANK);
+        assert_eq!(shift_north(TWO_RANK, 4), SIX_RANK);
     }
 }

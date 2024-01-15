@@ -26,6 +26,8 @@ pub const SIX_RANK: BitBoard = 0x0000FF0000000000;
 pub const SEVEN_RANK: BitBoard = 0x00FF000000000000;
 pub const EIGHT_RANK: BitBoard = 0xFF00000000000000;
 
+pub const FULL_BOARD: BitBoard = 0xFFFFFFFFFFFFFFFF;
+
 pub const A1_H8_DIAG: BitBoard = 0x8040201008040201;
 pub const H1_A8_DIAG: BitBoard = 0x0102040810204080;
 pub const NOT_A_FILE: BitBoard = !A_FILE;
