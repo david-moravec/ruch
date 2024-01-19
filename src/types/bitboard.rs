@@ -1,5 +1,5 @@
 use crate::board::board_flat;
-use crate::constants::{ONE, ROW_COUNT, ZERO};
+use crate::constants::{NOT_A_FILE, NOT_H_FILE, ONE, ROW_COUNT, ZERO};
 use crate::types::square::Square;
 
 use strum::IntoEnumIterator;
@@ -10,20 +10,36 @@ pub fn square_occupied(bboard: BitBoard, square: Square) -> bool {
     bboard & (ONE << square as u64) != 0
 }
 
-pub fn shift_south(bitboard: BitBoard, rank_count: usize) -> BitBoard {
-    bitboard >> rank_count * 8
+pub const fn north_one(bitboard: BitBoard) -> BitBoard {
+    bitboard << 8
 }
 
-pub fn shift_north(bitboard: BitBoard, rank_count: usize) -> BitBoard {
-    bitboard << rank_count * 8
+pub const fn south_one(bitboard: BitBoard) -> BitBoard {
+    bitboard >> 8
 }
 
-pub fn shift_west(bitboard: BitBoard, file_count: usize) -> BitBoard {
-    bitboard >> file_count
+pub const fn west_one(bitboard: BitBoard) -> BitBoard {
+    bitboard << 1 & NOT_A_FILE
 }
 
-pub fn shift_east(bitboard: BitBoard, file_count: usize) -> BitBoard {
-    bitboard << file_count
+pub const fn north_west_one(bitboard: BitBoard) -> BitBoard {
+    bitboard << 9 & NOT_A_FILE
+}
+
+pub const fn south_west_one(bitboard: BitBoard) -> BitBoard {
+    bitboard >> 7 & NOT_A_FILE
+}
+
+pub const fn east_one(bitboard: BitBoard) -> BitBoard {
+    bitboard >> 1 & NOT_H_FILE
+}
+
+pub const fn north_east_one(bitboard: BitBoard) -> BitBoard {
+    bitboard >> 9 & NOT_H_FILE
+}
+
+pub const fn south_east_one(bitboard: BitBoard) -> BitBoard {
+    bitboard << 7 & NOT_H_FILE
 }
 
 pub fn bitboard_from_str(s: &'static str) -> Result<u64, &'static str> {
@@ -190,13 +206,44 @@ mod test {
     }
 
     #[test]
-    fn test_shift_south() {
-        assert_eq!(shift_south(TWO_RANK, 1), ONE_RANK);
-        assert_eq!(shift_south(SIX_RANK, 4), TWO_RANK);
+    fn test_south_one() {
+        assert_eq!(south_one(TWO_RANK), ONE_RANK);
+        assert_eq!(south_one(SIX_RANK), FIVE_RANK);
     }
     #[test]
-    fn test_shift_north() {
-        assert_eq!(shift_north(TWO_RANK, 1), THREE_RANK);
-        assert_eq!(shift_north(TWO_RANK, 4), SIX_RANK);
+    fn test_north_one() {
+        assert_eq!(north_one(TWO_RANK), THREE_RANK);
+        assert_eq!(north_one(SIX_RANK), SEVEN_RANK);
+    }
+
+    #[test]
+    fn test_east_one() {
+        let e5 = bitboard_from_str(
+            "........
+             ........
+             ........
+             ....x...
+             ........
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        let e5_east_one = bitboard_from_str(
+            "........
+             ........
+             ........
+             ...x....
+             ........
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        println!("{}", bitboard_to_str(east_one(e5)));
+
+        assert_eq!(e5_east_one, east_one(e5));
     }
 }
