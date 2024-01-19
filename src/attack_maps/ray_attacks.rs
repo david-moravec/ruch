@@ -1,6 +1,6 @@
 use crate::{
-    bitboard::BitBoard,
-    constants::{A1_H8_DIAG, A_FILE, H_FILE},
+    bitboard::{bitboard_to_str, BitBoard},
+    constants::{A1_H8_DIAG, A_FILE, EIGHT_RANK, H_FILE, ONE_RANK},
 };
 use std::collections::HashMap;
 
@@ -17,13 +17,27 @@ enum RayDirection {
 }
 
 const fn calculate_south_ray_attack(origin: BitBoard) -> BitBoard {
-    let source: BitBoard = H_FILE << 8;
-    source << origin.leading_zeros()
+    let source: BitBoard = H_FILE >> 8;
+    source >> origin.leading_zeros()
 }
 
 const fn calculate_north_ray_attack(origin: BitBoard) -> BitBoard {
     let source: BitBoard = A_FILE << 8;
     source << origin.trailing_zeros()
+}
+
+const fn calculate_east_ray_attack(origin: BitBoard) -> BitBoard {
+    let source: BitBoard = EIGHT_RANK >> 1;
+    let not_rank_below = !(EIGHT_RANK >> 8 * (origin.leading_zeros() / 8 + 1));
+
+    source >> origin.leading_zeros() & not_rank_below
+}
+
+const fn calculate_west_ray_attack(origin: BitBoard) -> BitBoard {
+    let source: BitBoard = ONE_RANK << 1;
+    let not_rank_above = !(ONE_RANK << 8 * (origin.trailing_zeros() / 8 + 1));
+
+    source << origin.trailing_zeros() & not_rank_above
 }
 
 fn calculate_ray_attacks_for_each_direction_pos(
@@ -46,10 +60,10 @@ fn calculate_ray_attacks_for_each_direction_pos(
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::bitboard::bitboard_from_str;
+    use crate::bitboard::{bitboard_from_str, bitboard_to_str};
 
     #[test]
-    fn test_calculate_ray_attacks_for_each_direction() {
+    fn test_calculate_north_ray_attacks() {
         let d4 = bitboard_from_str(
             "........
              ........
@@ -77,6 +91,7 @@ mod test {
         assert_eq!(north_ray_d4, calculate_north_ray_attack(d4));
     }
 
+    #[test]
     fn test_calculate_south_ray_attack() {
         let south_ray_d4 = bitboard_from_str(
             "........
@@ -103,5 +118,69 @@ mod test {
         .unwrap();
 
         assert_eq!(south_ray_d4, calculate_south_ray_attack(d4))
+    }
+
+    #[test]
+    fn test_calculate_west_ray_attack() {
+        let east_ray_d4 = bitboard_from_str(
+            "........
+             ........
+             ........
+             ........
+             ....xxxx
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        let d4 = bitboard_from_str(
+            "........
+             ........
+             ........
+             ........
+             ...x....
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        println!("{}", bitboard_to_str(calculate_west_ray_attack(d4)));
+
+        assert_eq!(east_ray_d4, calculate_west_ray_attack(d4))
+    }
+
+    #[test]
+    fn test_calculate_east_ray_attack() {
+        let east_ray_d4 = bitboard_from_str(
+            "........
+             ........
+             ........
+             ........
+             xxx.....
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        let d4 = bitboard_from_str(
+            "........
+             ........
+             ........
+             ........
+             ...x....
+             ........
+             ........
+             ........",
+        )
+        .unwrap();
+
+        let ray_attack = calculate_east_ray_attack(d4);
+
+        println!("ray attack \n{}", bitboard_to_str(ray_attack));
+
+        assert_eq!(east_ray_d4, ray_attack)
     }
 }
