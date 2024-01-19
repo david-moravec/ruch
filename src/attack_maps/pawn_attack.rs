@@ -1,6 +1,6 @@
-use crate::bitboard::BitBoard;
 use crate::constants::{NOT_A_FILE, NOT_H_FILE};
 use crate::piece::Color;
+use crate::types::bitboard::BitBoard;
 
 fn pawn_west_attacks(color: Color, pawn_bitboard: BitBoard) -> BitBoard {
     match color {
@@ -31,8 +31,8 @@ pub fn pawn_single_attacks(color: Color, pawn_bitboard: BitBoard) -> BitBoard {
 #[cfg(test)]
 mod test {
     use crate::attack_maps::pawn_attack::pawn_any_attacks;
-    use crate::bitboard::bitboard_from_str;
     use crate::piece::Color::*;
+    use crate::types::bitboard::bitboard_from_str;
 
     #[test]
     fn test_west_pawn_attacks() {

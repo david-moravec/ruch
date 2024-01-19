@@ -1,10 +1,10 @@
 mod attack_maps;
-mod bitboard;
+mod board;
 mod constants;
 mod piece;
 mod types;
 
-use crate::bitboard::{fill_board_fen, print_board, Board};
+use crate::board::{fill_board_fen, print_board, Board};
 use crate::constants::DEFAULT_FEN;
 
 fn main() {

@@ -1,5 +1,6 @@
-use crate::bitboard::{board_flat, BitBoard, BoardFlat};
+use crate::board::{board_flat, BoardFlat};
 use crate::constants::{NOT_AB_FILE, NOT_A_FILE, NOT_GH_FILE, NOT_H_FILE, ZERO};
+use crate::types::bitboard::BitBoard;
 
 const fn generate_knight_attacks() -> BoardFlat<BitBoard> {
     let mut result = board_flat(0);
@@ -35,7 +36,7 @@ pub const KNIGHT_ATTACKS: BoardFlat<BitBoard> = generate_knight_attacks();
 
 #[cfg(test)]
 mod test {
-    use crate::bitboard::bitboard_from_str;
+    use crate::types::bitboard::bitboard_from_str;
     use crate::types::square::Square;
 
     use super::calculate_knight_attack_set;

@@ -2,8 +2,8 @@ use int_enum::IntEnum;
 use std::hash::Hash;
 use strum_macros::EnumIter;
 
-use crate::bitboard::BitBoard;
 use crate::constants::{A_FILE, B_FILE, C_FILE, D_FILE, E_FILE, F_FILE, G_FILE, H_FILE};
+use crate::types::bitboard::BitBoard;
 use crate::types::square::Square;
 use crate::types::square::Square::*;
 

@@ -1,6 +1,6 @@
 use crate::{
-    bitboard::{bitboard_to_str, BitBoard},
     constants::{A1_H8_DIAG, A_FILE, EIGHT_RANK, H_FILE, ONE_RANK},
+    types::bitboard::BitBoard,
 };
 use std::collections::HashMap;
 
@@ -60,7 +60,7 @@ fn calculate_ray_attacks_for_each_direction_pos(
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::bitboard::{bitboard_from_str, bitboard_to_str};
+    use crate::types::bitboard::{bitboard_from_str, bitboard_to_str};
 
     #[test]
     fn test_calculate_north_ray_attacks() {

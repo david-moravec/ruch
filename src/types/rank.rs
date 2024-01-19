@@ -2,8 +2,8 @@ use int_enum::IntEnum;
 use std::hash::Hash;
 use strum_macros::EnumIter;
 
-use crate::bitboard::BitBoard;
 use crate::constants::FULL_BOARD;
+use crate::types::bitboard::BitBoard;
 use crate::types::square::{Square, Square::*};
 
 #[repr(u64)]

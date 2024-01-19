@@ -1,4 +1,4 @@
-use crate::bitboard::BitBoard;
+use crate::types::bitboard::BitBoard;
 
 pub const ONE: u64 = 1;
 pub const ZERO: u64 = 0;
