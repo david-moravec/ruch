@@ -1,11 +1,10 @@
 use crate::{
     constants::{A1_H8_DIAG, A_FILE, EIGHT_RANK, H1_A8_DIAG, H_FILE, ONE_RANK},
     types::bitboard::{
-        bitboard_to_str, east_one, north_east_one, north_west_one, south_east_one, south_west_one,
-        west_one, BitBoard,
+        east_one, north_east_one, north_one, north_west_one, south_east_one, south_one,
+        south_west_one, west_one, BitBoard,
     },
 };
-use std::collections::HashMap;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum RayDirection {
@@ -20,24 +19,22 @@ enum RayDirection {
 }
 
 const fn calculate_south_ray_attack(origin: BitBoard) -> BitBoard {
-    let source: BitBoard = H_FILE >> 8;
-    source >> origin.leading_zeros()
+    south_one(H_FILE) >> origin.leading_zeros()
 }
 
 const fn calculate_north_ray_attack(origin: BitBoard) -> BitBoard {
-    let source: BitBoard = A_FILE << 8;
-    source << origin.trailing_zeros()
+    north_one(A_FILE) << origin.trailing_zeros()
 }
 
 const fn calculate_east_ray_attack(origin: BitBoard) -> BitBoard {
-    let source: BitBoard = EIGHT_RANK >> 1;
+    let source: BitBoard = east_one(EIGHT_RANK);
     let not_rank_below = !(EIGHT_RANK >> 8 * (origin.leading_zeros() / 8 + 1));
 
     source >> origin.leading_zeros() & not_rank_below
 }
 
 const fn calculate_west_ray_attack(origin: BitBoard) -> BitBoard {
-    let source: BitBoard = ONE_RANK << 1;
+    let source: BitBoard = west_one(ONE_RANK);
     let not_rank_above = !(ONE_RANK << 8 * (origin.trailing_zeros() / 8 + 1));
 
     source << origin.trailing_zeros() & not_rank_above
@@ -108,27 +105,11 @@ fn calculate_south_west_ray_attack(origin: BitBoard) -> BitBoard {
 
     result >> rank_count * 8
 }
-fn calculate_ray_attacks_for_each_direction_pos(
-    origin: BitBoard,
-) -> HashMap<RayDirection, BitBoard> {
-    let mut result: HashMap<RayDirection, BitBoard> = HashMap::new();
-    let leading_zeros: u32 = origin.leading_zeros();
-
-    result.insert(RayDirection::NORTH, calculate_north_ray_attack(origin));
-    result.insert(RayDirection::SOUTH, calculate_south_ray_attack(origin));
-
-    result.insert(RayDirection::NOEAST, {
-        let source: BitBoard = A1_H8_DIAG;
-        source >> leading_zeros
-    });
-
-    result
-}
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::types::bitboard::{bitboard_from_str, bitboard_to_str};
+    use crate::types::bitboard::bitboard_from_str;
 
     #[test]
     fn test_calculate_north_ray_attacks() {
