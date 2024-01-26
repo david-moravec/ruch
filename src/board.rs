@@ -24,6 +24,12 @@ pub type BoardFlat<T> = [T; SQUARE_COUNT];
 pub const fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
     [arg; SQUARE_COUNT]
 }
+pub fn board_flat_non_copy<T, F>(mut cb: F) -> BoardFlat<T>
+where
+    F: FnMut(usize) -> T,
+{
+    std::array::from_fn(|i| cb(i))
+}
 
 pub struct Board {
     bit_boards: HashMap<Piece, BitBoard>,
