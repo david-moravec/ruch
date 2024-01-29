@@ -4,9 +4,10 @@ pub const ONE: u64 = 1;
 pub const ZERO: u64 = 0;
 pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-pub const ROW_COUNT: usize = 8;
-pub const FILE_COUNT: usize = 8;
-pub const SQUARE_COUNT: usize = ROW_COUNT * FILE_COUNT;
+pub const SQUARES_IN_RANK: u32 = 8;
+pub const RANK_COUNT: u32 = 8;
+pub const FILE_COUNT: u32 = 8;
+pub const SQUARE_COUNT: u32 = RANK_COUNT * FILE_COUNT;
 
 pub const A_FILE: BitBoard = 0x0101010101010101;
 pub const B_FILE: BitBoard = 0x0202020202020202;

@@ -1,9 +1,12 @@
 use crate::{
     board::{board_flat, board_flat_non_copy, BoardFlat},
-    constants::{A1_H8_DIAG, A_FILE, EIGHT_RANK, H1_A8_DIAG, H_FILE, ONE_RANK},
+    constants::{
+        A1_H8_DIAG, A_FILE, EIGHT_RANK, FILE_COUNT, H1_A8_DIAG, H_FILE, ONE_RANK, RANK_COUNT,
+        SQUARES_IN_RANK,
+    },
     types::bitboard::{
-        east_one, north_east_one, north_one, north_west_one, south_east_one, south_one,
-        south_west_one, west_one, BitBoard,
+        bitboard_to_str, east_one, north_east_one, north_one, north_west_one, south_east_one,
+        south_one, south_west_one, west_one, BitBoard,
     },
     types::square::Square,
 };
@@ -33,14 +36,16 @@ const fn calculate_north_ray_attack(origin: BitBoard) -> BitBoard {
 
 const fn calculate_east_ray_attack(origin: BitBoard) -> BitBoard {
     let source: BitBoard = east_one(EIGHT_RANK);
-    let not_rank_below = !(EIGHT_RANK >> 8 * (origin.leading_zeros() / 8 + 1));
+    let not_rank_below =
+        !(EIGHT_RANK >> SQUARES_IN_RANK * (origin.leading_zeros() / RANK_COUNT + 1));
 
     source >> origin.leading_zeros() & not_rank_below
 }
 
 const fn calculate_west_ray_attack(origin: BitBoard) -> BitBoard {
     let source: BitBoard = west_one(ONE_RANK);
-    let not_rank_above = !(ONE_RANK << 8 * (origin.trailing_zeros() / 8 + 1));
+    let not_rank_above =
+        !(ONE_RANK << SQUARES_IN_RANK * (origin.trailing_zeros() / RANK_COUNT + 1));
 
     source << origin.trailing_zeros() & not_rank_above
 }
@@ -51,15 +56,15 @@ const fn calculate_nowest_ray_attack(origin: BitBoard) -> BitBoard {
     let trailing_zeros = origin.trailing_zeros();
     let mut i = 0;
 
-    let file_count = trailing_zeros % 8;
-    let rank_count = trailing_zeros / 8;
+    let file_count = trailing_zeros % FILE_COUNT;
+    let rank_count = trailing_zeros / RANK_COUNT;
 
     while i < file_count {
         result = west_one(result);
         i += 1;
     }
 
-    result << rank_count * 8
+    result << rank_count * SQUARES_IN_RANK
 }
 
 const fn calculate_soeast_ray_attack(origin: BitBoard) -> BitBoard {
@@ -68,15 +73,15 @@ const fn calculate_soeast_ray_attack(origin: BitBoard) -> BitBoard {
     let leading_zeros = origin.leading_zeros();
     let mut i = 0;
 
-    let file_count = leading_zeros % 8;
-    let rank_count = leading_zeros / 8;
+    let file_count = leading_zeros % FILE_COUNT;
+    let rank_count = leading_zeros / RANK_COUNT;
 
     while i < file_count {
         result = east_one(result);
         i += 1;
     }
 
-    result >> rank_count * 8
+    result >> rank_count * SQUARES_IN_RANK
 }
 
 const fn calculate_noeast_ray_attack(origin: BitBoard) -> BitBoard {
@@ -84,15 +89,15 @@ const fn calculate_noeast_ray_attack(origin: BitBoard) -> BitBoard {
 
     let mut i = 0;
 
-    let file_count = origin.leading_zeros() % 8;
-    let rank_count = origin.trailing_zeros() / 8;
+    let file_count = origin.leading_zeros() % FILE_COUNT;
+    let rank_count = origin.trailing_zeros() / RANK_COUNT;
 
     while i < file_count {
         result = east_one(result);
         i += 1;
     }
 
-    result << rank_count * 8
+    result << rank_count * SQUARES_IN_RANK
 }
 
 const fn calculate_sowest_ray_attack(origin: BitBoard) -> BitBoard {
@@ -100,23 +105,27 @@ const fn calculate_sowest_ray_attack(origin: BitBoard) -> BitBoard {
 
     let mut i = 0;
 
-    let file_count = origin.trailing_zeros() % 8;
-    let rank_count = origin.leading_zeros() / 8;
+    let file_count = origin.trailing_zeros() % FILE_COUNT;
+    let rank_count = origin.leading_zeros() / RANK_COUNT;
 
     while i < file_count {
         result = west_one(result);
         i += 1;
     }
 
-    result >> rank_count * 8
+    result >> rank_count * SQUARES_IN_RANK
 }
 
 type RayCollection = HashMap<RayDirection, BitBoard>;
 
 fn ray_collection(origin: usize) -> RayCollection {
+    println!("Ray colleciton for square index: {}", origin);
+
     let origin_bitboard: BitBoard = Square::try_from(origin as u64)
         .expect("Cannot convert number to square")
         .as_bitboard();
+
+    println!("Square bitboard: {}", bitboard_to_str(origin_bitboard));
 
     HashMap::from([
         (
@@ -405,13 +414,13 @@ mod test {
         assert_eq!(correct_ray_attack, calculated_ray_attack)
     }
 
-    // #[test]
-    // fn test_calculate_ray_collection_for_each_square() {
-    //     let ray_collection_all = calculate_ray_collection_for_each_square();
-    //
-    //     assert_eq!(ray_collection_all.len(), SQUARE_COUNT)
-    // }
-    //
+    #[test]
+    fn test_calculate_ray_collection_for_each_square() {
+        let ray_collection_all = calculate_ray_collection_for_each_square();
+
+        assert_eq!(ray_collection_all.len(), SQUARE_COUNT as usize)
+    }
+
     #[test]
     fn test_ray_collection() {
         let ray_collection = ray_collection(55);

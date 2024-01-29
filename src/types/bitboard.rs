@@ -1,5 +1,5 @@
 use crate::board::board_flat;
-use crate::constants::{NOT_A_FILE, NOT_H_FILE, ONE, ROW_COUNT, ZERO};
+use crate::constants::{NOT_A_FILE, NOT_H_FILE, ONE, RANK_COUNT, ZERO};
 use crate::types::square::Square;
 
 use strum::IntoEnumIterator;
@@ -62,7 +62,7 @@ fn flatten_multiline_string_to_bitboard_repr(s: String) -> Result<Vec<char>, &'s
         Err("String needs to have one character for each square")
     } else {
         Ok(s_vec
-            .chunks(ROW_COUNT)
+            .chunks(RANK_COUNT as usize)
             .rev()
             .flat_map(|chunk| chunk.iter())
             .map(|c| *c)
@@ -80,7 +80,7 @@ pub fn bitboard_to_str(bitboard: BitBoard) -> String {
     }
 
     result_unreversed
-        .chunks(ROW_COUNT)
+        .chunks(RANK_COUNT as usize)
         .rev()
         .flat_map(|chunk| chunk.iter().chain(['\n'].iter()))
         .map(|c| *c)

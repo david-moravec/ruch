@@ -3,15 +3,15 @@ use std::collections::HashMap;
 use std::iter::{repeat, zip};
 use strum::IntoEnumIterator;
 
-use crate::constants::{FILE_COUNT, ONE, ROW_COUNT, SQUARE_COUNT, ZERO};
+use crate::constants::{FILE_COUNT, ONE, RANK_COUNT, SQUARE_COUNT, ZERO};
 use crate::piece::{Piece, PIECE_SET};
 use crate::types::bitboard::{square_occupied, BitBoard};
 use crate::types::file::File;
 use crate::types::square::Square;
 
-pub type BoardSerialized<T> = [[T; ROW_COUNT]; FILE_COUNT];
+pub type BoardSerialized<T> = [[T; RANK_COUNT as usize]; FILE_COUNT as usize];
 pub const fn board_serialized<T: Copy>(arg: T) -> BoardSerialized<T> {
-    [[arg; ROW_COUNT]; FILE_COUNT]
+    [[arg; RANK_COUNT as usize]; FILE_COUNT as usize]
 }
 
 fn rotate_serialized_board<T: Copy>(mut board: BoardSerialized<T>) -> BoardSerialized<T> {
@@ -20,9 +20,9 @@ fn rotate_serialized_board<T: Copy>(mut board: BoardSerialized<T>) -> BoardSeria
     board
 }
 
-pub type BoardFlat<T> = [T; SQUARE_COUNT];
+pub type BoardFlat<T> = [T; SQUARE_COUNT as usize];
 pub const fn board_flat<T: Copy>(arg: T) -> BoardFlat<T> {
-    [arg; SQUARE_COUNT]
+    [arg; SQUARE_COUNT as usize]
 }
 pub fn board_flat_non_copy<T, F>(mut cb: F) -> BoardFlat<T>
 where
@@ -131,7 +131,7 @@ pub fn print_board(board: &Board) -> () {
     print!("  _________________\n");
 
     for (i, rank) in piece_bit_board.iter().rev().enumerate() {
-        print!("{} ", FILE_COUNT - i);
+        print!("{} ", FILE_COUNT as usize - i);
 
         for piece_opt in rank {
             match piece_opt {
