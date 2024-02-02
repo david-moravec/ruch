@@ -34,18 +34,28 @@ const fn calculate_north_ray_attack(origin: BitBoard) -> BitBoard {
     north_one(A_FILE) << origin.trailing_zeros()
 }
 
-const fn calculate_east_ray_attack(origin: BitBoard) -> BitBoard {
+const fn calculate_west_ray_attack(origin: BitBoard) -> BitBoard {
     let source: BitBoard = east_one(EIGHT_RANK);
-    let not_rank_below =
-        !(EIGHT_RANK >> SQUARES_IN_RANK * (origin.leading_zeros() / RANK_COUNT + 1));
+    let shift_by = SQUARES_IN_RANK * (origin.leading_zeros() / RANK_COUNT + 1);
+
+    let not_rank_below: u64 = if shift_by < 64 {
+        !(EIGHT_RANK >> shift_by)
+    } else {
+        0
+    };
 
     source >> origin.leading_zeros() & not_rank_below
 }
 
-const fn calculate_west_ray_attack(origin: BitBoard) -> BitBoard {
+const fn calculate_east_ray_attack(origin: BitBoard) -> BitBoard {
     let source: BitBoard = west_one(ONE_RANK);
-    let not_rank_above =
-        !(ONE_RANK << SQUARES_IN_RANK * (origin.trailing_zeros() / RANK_COUNT + 1));
+    let shift_by = SQUARES_IN_RANK * (origin.trailing_zeros() / RANK_COUNT + 1);
+
+    let not_rank_above: u64 = if shift_by < 64 {
+        !(ONE_RANK << shift_by)
+    } else {
+        0
+    };
 
     source << origin.trailing_zeros() & not_rank_above
 }
@@ -118,14 +128,12 @@ const fn calculate_sowest_ray_attack(origin: BitBoard) -> BitBoard {
 
 type RayCollection = HashMap<RayDirection, BitBoard>;
 
-fn ray_collection(origin: usize) -> RayCollection {
-    println!("Ray colleciton for square index: {}", origin);
+fn ray_collection(square_index: usize) -> RayCollection {
+    // Gives ray collection for square specified by square index
 
-    let origin_bitboard: BitBoard = Square::try_from(origin as u64)
+    let origin_bitboard: BitBoard = Square::try_from(square_index as u64)
         .expect("Cannot convert number to square")
         .as_bitboard();
-
-    println!("Square bitboard: {}", bitboard_to_str(origin_bitboard));
 
     HashMap::from([
         (
@@ -138,11 +146,11 @@ fn ray_collection(origin: usize) -> RayCollection {
         ),
         (
             RayDirection::WEST,
-            calculate_west_ray_attack(origin_bitboard),
+            calculate_east_ray_attack(origin_bitboard),
         ),
         (
             RayDirection::EAST,
-            calculate_east_ray_attack(origin_bitboard),
+            calculate_west_ray_attack(origin_bitboard),
         ),
         (
             RayDirection::NOWEST,
@@ -231,7 +239,7 @@ mod test {
     }
 
     #[test]
-    fn test_calculate_west_ray_attack() {
+    fn test_calculate_east_ray_attack() {
         let east_ray_d4 = bitboard_from_str(
             "........
              ........
@@ -256,11 +264,15 @@ mod test {
         )
         .unwrap();
 
-        assert_eq!(east_ray_d4, calculate_west_ray_attack(d4))
+        let calculated_ray_attack = calculate_east_ray_attack(d4);
+
+        println!("{}", bitboard_to_str(calculated_ray_attack));
+
+        assert_eq!(east_ray_d4, calculated_ray_attack)
     }
 
     #[test]
-    fn test_calculate_east_ray_attack() {
+    fn test_calculate_west_ray_attack() {
         let east_ray_d4 = bitboard_from_str(
             "........
              ........
@@ -285,7 +297,7 @@ mod test {
         )
         .unwrap();
 
-        let ray_attack = calculate_east_ray_attack(d4);
+        let ray_attack = calculate_west_ray_attack(d4);
 
         assert_eq!(east_ray_d4, ray_attack)
     }
